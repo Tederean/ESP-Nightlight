@@ -1,10 +1,5 @@
 .pio
 .pioenvs
 .piolibdeps
-.vscode/*
-.travis.yml
-dump.txt
-EspStackTraceDecoder.jar
-LED.txt
+.vscode
 platformio.ini
-stacktrace.py
