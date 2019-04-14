@@ -1,4 +1,4 @@
-# Command-line Decoder for Strack Trace from ESP8266 and ESP32
+# Command-line Decoder for Strack Trace for ESP8266 & ESP32
 
 based on the work from https://github.com/me-no-dev/EspExceptionDecoder, 
 littleyoda rewrote the decoder completely for command-line usage.
