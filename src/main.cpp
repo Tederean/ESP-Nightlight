@@ -18,7 +18,7 @@ void loop()
 void setup()
 {
 	#ifdef SERIAL_DEBUG
-        Serial.begin(115200UL);
+		Serial.begin(115200UL);
 		Serial.setDebugOutput(true);
 	#endif
 
