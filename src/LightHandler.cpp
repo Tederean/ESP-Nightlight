@@ -161,6 +161,11 @@ namespace LightHandler
         #endif
     }
 
+    void onRestartEvent()
+    {
+        ESP.restart();
+    }
+
     void setupPart2()
     {
         #ifdef SERIAL_DEBUG
@@ -173,6 +178,38 @@ namespace LightHandler
         _local_tz = new Timezone();
         _local_tz->setPosix(TZ_INFO);
         _local_tz->setDefault();
+
+        // Setup restart event
+        
+        time_t now = UTC.now();
+
+        tmElements_t timeBuilder;
+        breakTime(now, timeBuilder); // Load present time into time builder. 
+
+        timeBuilder.Hour = 12;
+        timeBuilder.Minute = 0;
+        timeBuilder.Second = 0;
+        time_t restart_time = makeTime(timeBuilder) + random(-600, 600);
+
+    
+        if (((int64_t) restart_time - now) < 1800L) // Scheudle to next day if event to restart is less than half an hour.
+        {
+            restart_time += (3600UL*24UL);
+        }
+
+        #ifdef SERIAL_DEBUG
+            #if defined(ESP8266)
+                yield();
+            #endif
+
+            Serial.print("UTC Restart time: ");
+            Serial.print(UTC.dateTime(restart_time));
+            Serial.println('\n');
+
+            delay(1000);
+        #endif
+
+        _local_tz->setEvent(onRestartEvent, restart_time, UTC_TIME);
     }
 
     void setupPart1()

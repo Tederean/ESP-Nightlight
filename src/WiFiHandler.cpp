@@ -65,12 +65,12 @@ namespace WiFiHandler
 	}
 
 	#if defined(ESP8266)
-		void esp8266OnWifiConnect(const WiFiEventStationModeGotIP& event)
+		void esp8266OnWifiConnect(const WiFiEventStationModeGotIP &event)
 		{
 			onWifiConnectEvent();
 		}
 
-		void esp8266OnWifiDisconnect(const WiFiEventStationModeDisconnected& event)
+		void esp8266OnWifiDisconnect(const WiFiEventStationModeDisconnected &event)
 		{
 			onWifiDisconnectEvent();
 		}
