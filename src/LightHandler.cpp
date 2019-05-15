@@ -163,7 +163,48 @@ namespace LightHandler
 
     void onRestartEvent()
     {
+        #ifdef SERIAL_DEBUG
+            Serial.print("ESP Reboot!");
+            Serial.println('\n');
+            Serial.flush();
+
+            delay(10);
+        #endif
+
         ESP.restart();
+
+        while(true)
+            NOP();
+    }
+
+    void setupRestartEvent()
+    {
+        time_t now = UTC.now();
+        tmElements_t timeBuilder;
+
+        // Load present time into builder. 
+        breakTime(now, timeBuilder);
+
+        timeBuilder.Hour = 12;
+        timeBuilder.Minute = 0;
+        timeBuilder.Second = 0;
+
+        // Add or subtract 10 minutes random
+        time_t restart_time = makeTime(timeBuilder) + random(-600, 600);
+
+        // Postpone to next day if period to restart is fewer than half an hour.
+        if (((int64_t) restart_time - now) < 1800L)
+        {
+            restart_time += (3600UL*24UL);
+        }
+
+        #ifdef SERIAL_DEBUG
+            Serial.print("ESP restart time (UTC): ");
+            Serial.print(UTC.dateTime(restart_time, UTC_TIME));
+            Serial.println('\n');
+        #endif
+
+        UTC.setEvent(onRestartEvent, restart_time, UTC_TIME);
     }
 
     void setupPart2()
@@ -179,37 +220,7 @@ namespace LightHandler
         _local_tz->setPosix(TZ_INFO);
         _local_tz->setDefault();
 
-        // Setup restart event
-        
-        time_t now = UTC.now();
-
-        tmElements_t timeBuilder;
-        breakTime(now, timeBuilder); // Load present time into time builder. 
-
-        timeBuilder.Hour = 12;
-        timeBuilder.Minute = 0;
-        timeBuilder.Second = 0;
-        time_t restart_time = makeTime(timeBuilder) + random(-600, 600);
-
-    
-        if (((int64_t) restart_time - now) < 1800L) // Scheudle to next day if event to restart is less than half an hour.
-        {
-            restart_time += (3600UL*24UL);
-        }
-
-        #ifdef SERIAL_DEBUG
-            #if defined(ESP8266)
-                yield();
-            #endif
-
-            Serial.print("UTC Restart time: ");
-            Serial.print(UTC.dateTime(restart_time));
-            Serial.println('\n');
-
-            delay(1000);
-        #endif
-
-        _local_tz->setEvent(onRestartEvent, restart_time, UTC_TIME);
+        setupRestartEvent();
     }
 
     void setupPart1()
