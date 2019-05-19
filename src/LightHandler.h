@@ -5,6 +5,8 @@
 
 namespace LightHandler
 {
+    bool isTimeSynced();
+    
     void loop();
 
     void setupPart2();

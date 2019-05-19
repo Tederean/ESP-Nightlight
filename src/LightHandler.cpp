@@ -123,6 +123,51 @@ namespace LightHandler
         return asin(sun_angle)/DEG_TO_RAD;
     }
 
+    void doRestartEvent()
+    {
+        #ifdef SERIAL_DEBUG
+            Serial.print("Daily restart event triggered!\n\n");
+            Serial.flush();
+        #endif
+
+        ESP.restart();
+    }
+
+    void setupRestartEvent()
+    {
+        time_t now = UTC.now();
+        tmElements_t timeBuilder;
+
+        // Load present time into builder. 
+        breakTime(now, timeBuilder);
+
+        timeBuilder.Hour = 12;
+        timeBuilder.Minute = 0;
+        timeBuilder.Second = 0;
+
+        // Add or subtract 10 minutes random.
+        time_t restart_time = makeTime(timeBuilder) + random(-600, 600);
+
+        // Postpone to next day if period to restart is fewer than half an hour.
+        if (((int64_t) restart_time - now) < 1800L)
+        {
+            restart_time += (3600UL*24UL);
+        }
+
+        #ifdef SERIAL_DEBUG
+            Serial.print("ESP restart time (UTC): ");
+            Serial.print(UTC.dateTime(restart_time, UTC_TIME));
+            Serial.println('\n');
+        #endif
+
+        UTC.setEvent(doRestartEvent, restart_time, UTC_TIME);
+    }
+
+    bool isTimeSynced()
+    {
+        return timeStatus() == timeStatus_t::timeSet;
+    }
+
     void loop()
     {
         events();
@@ -144,7 +189,7 @@ namespace LightHandler
 
         writePWM( min(sunPathDutyCycle, elapsedDayTimeDutyCycle) );
 
-        #ifdef SERIAL_DEBUG
+        /*#ifdef SERIAL_DEBUG
             #if defined(ESP8266)
                 yield();
             #endif
@@ -158,53 +203,7 @@ namespace LightHandler
             Serial.println('\n');
 
             delay(1000);
-        #endif
-    }
-
-    void onRestartEvent()
-    {
-        #ifdef SERIAL_DEBUG
-            Serial.print("ESP Reboot!");
-            Serial.println('\n');
-            Serial.flush();
-
-            delay(10);
-        #endif
-
-        ESP.restart();
-
-        while(true)
-            NOP();
-    }
-
-    void setupRestartEvent()
-    {
-        time_t now = UTC.now();
-        tmElements_t timeBuilder;
-
-        // Load present time into builder. 
-        breakTime(now, timeBuilder);
-
-        timeBuilder.Hour = 12;
-        timeBuilder.Minute = 0;
-        timeBuilder.Second = 0;
-
-        // Add or subtract 10 minutes random
-        time_t restart_time = makeTime(timeBuilder) + random(-600, 600);
-
-        // Postpone to next day if period to restart is fewer than half an hour.
-        if (((int64_t) restart_time - now) < 1800L)
-        {
-            restart_time += (3600UL*24UL);
-        }
-
-        #ifdef SERIAL_DEBUG
-            Serial.print("ESP restart time (UTC): ");
-            Serial.print(UTC.dateTime(restart_time, UTC_TIME));
-            Serial.println('\n');
-        #endif
-
-        UTC.setEvent(onRestartEvent, restart_time, UTC_TIME);
+        #endif*/
     }
 
     void setupPart2()
@@ -221,6 +220,7 @@ namespace LightHandler
         _local_tz->setDefault();
 
         setupRestartEvent();
+        setInterval(0);
     }
 
     void setupPart1()

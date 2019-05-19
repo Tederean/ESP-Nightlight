@@ -1,9 +1,11 @@
 #include <WiFiHandler.h>
 #include <Arduino.h>
 #include <ArduinoOTA.h>
+#include <LightHandler.h>
 
 #if defined(ESP8266)
 	#include <ESP8266WiFi.h>
+	#include <Ticker.h>
 #elif defined(ESP32)
 	#include <WiFi.h>
 #endif
@@ -14,7 +16,13 @@ namespace WiFiHandler
 	#if defined(ESP8266)
 		WiFiEventHandler esp8266WifiConnectHandler;
 		WiFiEventHandler esp8266WifiDisconnectHandler;
+
+		Ticker wiFiShutdownEventTimer;
+	#elif defined(ESP32)
+		TimerHandle_t wiFiShutdownEventTimer;
 	#endif
+
+	volatile bool wiFiShutdownEventTriggered;
 
 
 	void reconnectToWiFi()
@@ -31,6 +39,30 @@ namespace WiFiHandler
 		#elif defined(ESP32)
 			WiFi.setHostname(WIFI_NAME);
 		#endif
+	}
+
+	void doWiFiShutdownEvent()
+	{
+		wiFiShutdownEventTriggered = true;
+
+		if (LightHandler::isTimeSynced())
+		{
+			#ifdef SERIAL_DEBUG
+				Serial.print("Disconnecting from WiFi after await period has expired, everything ok!\n\n");
+			#endif
+
+			WiFi.disconnect(true);
+		}
+		else
+		{
+			#ifdef SERIAL_DEBUG
+				Serial.print("ESP is not able to connect to WiFi and/or NTP service.\n");
+				Serial.print("Rebooting ESP, hoping to fix issue with it.\n\n");
+				Serial.flush();
+			#endif
+
+			ESP.restart();
+		}
 	}
 
 	void onWifiConnectEvent()
@@ -61,7 +93,8 @@ namespace WiFiHandler
 			ArduinoOTA.end();
 		#endif
 
-		reconnectToWiFi();
+		if (!wiFiShutdownEventTriggered)
+			reconnectToWiFi();
 	}
 
 	#if defined(ESP8266)
@@ -127,11 +160,18 @@ namespace WiFiHandler
 
 	void setup()
 	{
+		wiFiShutdownEventTriggered = false;
+
 		#if defined(ESP8266)
 			esp8266WifiConnectHandler = WiFi.onStationModeGotIP(esp8266OnWifiConnect);
 			esp8266WifiDisconnectHandler = WiFi.onStationModeDisconnected(esp8266OnWifiDisconnect);
+
+			wiFiShutdownEventTimer.once(WIFI_SHUTDOWN_TIME, doWiFiShutdownEvent);
 		#elif defined(ESP32)
 			WiFi.onEvent(esp32OnWifiEvent);
+
+			wiFiShutdownEventTimer = xTimerCreate("wiFiTimer", pdMS_TO_TICKS(WIFI_SHUTDOWN_TIME*1000UL), pdFALSE, (void*)0, reinterpret_cast<TimerCallbackFunction_t>(doWiFiShutdownEvent));
+			xTimerStart(wiFiShutdownEventTimer, 0);
 		#endif
 
 		reconnectToWiFi();
