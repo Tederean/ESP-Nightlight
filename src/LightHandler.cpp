@@ -135,7 +135,7 @@ namespace LightHandler
 
     void setupRestartEvent()
     {
-        time_t now = UTC.now();
+        time_t now = _local_tz->now();
         tmElements_t timeBuilder;
 
         // Load present time into builder. 
@@ -155,12 +155,12 @@ namespace LightHandler
         }
 
         #ifdef SERIAL_DEBUG
-            Serial.print("ESP restart time (UTC): ");
-            Serial.print(UTC.dateTime(restart_time, UTC_TIME));
+            Serial.print("ESP restart time: ");
+            Serial.print(_local_tz->dateTime(restart_time, LOCAL_TIME));
             Serial.println('\n');
         #endif
 
-        UTC.setEvent(doRestartEvent, restart_time, UTC_TIME);
+        _local_tz->setEvent(doRestartEvent, restart_time, LOCAL_TIME);
     }
 
     bool isTimeSynced()
@@ -173,7 +173,7 @@ namespace LightHandler
         events();
 
         time_t now = UTC.now();
-
+        
         #ifdef TIME_LIB_DST_FIX
             if (_local_tz->isDST(now, UTC_TIME))
             {
