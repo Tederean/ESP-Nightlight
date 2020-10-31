@@ -74,7 +74,7 @@ public:
   {
     int64_t scheduledExecutionTime = esp_timer_get_time() + executionDelay;
 
-    Schedule(scheduledExecutionTime, handler);
+    RunAt(scheduledExecutionTime, handler);
   }
 
   void RunAt(int64_t executionTime, T *handler)
