@@ -1,0 +1,34 @@
+#ifndef _WifiService_
+#define _WifiService_
+
+#include <string>
+#include <framework/common/Event.h>
+
+using namespace std;
+
+namespace Services
+{
+  namespace Wifi
+  {
+
+    void Initialize();
+
+    void EnableWifi(string ssid, string password, string hostname);
+
+    void DisableWifi();
+
+    bool IsEnabled();
+
+    bool IsConnected();
+
+    extern Event<void> WifiEnablingEvent;
+
+    extern Event<void> WifiDisablingEvent;
+
+    extern Event<void> AccessPointConnectedEvent;
+
+    extern Event<void> AccessPointDisconnectedEvent;
+  } // namespace Wifi
+} // namespace Services
+
+#endif
