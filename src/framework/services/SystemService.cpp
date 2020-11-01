@@ -1,9 +1,6 @@
 #include <Arduino.h>
 #include <memory>
 #include <framework/services/SystemService.h>
-#include <framework/services/WifiService.h>
-#include <framework/services/OtaService.h>
-#include <framework/services/TimeService.h>
 #include <framework/common/Event.h>
 
 using namespace std;
@@ -46,10 +43,6 @@ namespace Services
       Serial.begin(115200UL);
       Serial.setDebugOutput(true);
 #endif
-
-      Services::Wifi::Initialize();
-      Services::Ota::Initialize();
-      Services::Time::Initialize();
     }
 
     void InvokeOnce(Event<void> *event, int64_t delay_us)
