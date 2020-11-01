@@ -2,6 +2,7 @@
 #define _TimerService_
 
 #include <Arduino.h>
+#include <ezTime.h>
 #include <framework/common/Event.h>
 
 using namespace std;
@@ -15,6 +16,8 @@ namespace Services
 
     bool IsTimeSynced();
 
+    extern Timezone Localtime;
+    
     extern Event<void> TimeSyncedEvent;
 
   } // namespace Wifi

@@ -88,6 +88,8 @@ namespace Services
       if (WifiEnabled)
         return;
 
+      WifiEnabled = true;
+
       SSID.assign(ssid);
       Password.assign(password);
       Hostname.assign(hostname);
@@ -95,8 +97,6 @@ namespace Services
       WifiEnablingEvent.Invoke(nullptr);
 
       ConnectToWifi();
-
-      WifiEnabled = true;
     }
 
     void ConnectToWifi()
@@ -115,6 +115,8 @@ namespace Services
       if (!WifiEnabled)
         return;
 
+      WifiEnabled = false;
+      
       WifiDisablingEvent.Invoke(nullptr);
 
       DisconnectFromWifi();
@@ -122,8 +124,6 @@ namespace Services
       SSID.clear();
       Password.clear();
       Hostname.clear();
-
-      WifiEnabled = false;
     }
 
     void DisconnectFromWifi()
@@ -200,18 +200,18 @@ namespace Services
 
     void OnAccessPointConnected()
     {
-      AccessPointConnectedEvent.Invoke(nullptr);
-
       WifiConnected = true;
+
+      AccessPointConnectedEvent.Invoke(nullptr);
     }
 
     void OnAccessPointDisconnected()
     {
       if (WifiConnected)
       {
-        AccessPointDisconnectedEvent.Invoke(nullptr);
-
         WifiConnected = false;
+
+        AccessPointDisconnectedEvent.Invoke(nullptr);
       }
     }
 

@@ -18,6 +18,8 @@ namespace Services
 
     void OnLoopEventTimeSync(void *args);
 
+    Timezone Localtime;
+
     Event<void> TimeSyncedEvent;
 
     bool TimeSynced;
@@ -25,6 +27,9 @@ namespace Services
     void Initialize()
     {
       TimeSynced = false;
+
+      Localtime.setPosix(TZ_INFO);
+      Localtime.setDefault();
 
 #ifdef SERIAL_DEBUG
       ezt::setDebug(INFO);
@@ -50,12 +55,13 @@ namespace Services
     {
       if (ezt::timeStatus() == timeStatus_t::timeSet)
       {
-        TimeSyncedEvent.Invoke(nullptr);
+        TimeSynced = true;
+
+        ezt::setInterval(0);
 
         Services::System::LoopEvent.Unsubscribe(OnLoopEventTimeSync);
 
-        ezt::setInterval(0);
-        TimeSynced = true;
+        TimeSyncedEvent.Invoke(nullptr);
       }
     }
 

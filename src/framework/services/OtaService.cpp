@@ -74,6 +74,8 @@ namespace Services
       if (OtaEnabled || OtaIsUpdating)
         return;
 
+      OtaEnabled = true;
+      
       Hostname.assign(hostname);
       Password.assign(password);
 
@@ -84,14 +86,14 @@ namespace Services
 
       Services::Wifi::AccessPointConnectedEvent.Subscribe(OnAccessPointConnectedEvent);
       Services::Wifi::AccessPointDisconnectedEvent.Subscribe(OnAccessPointDisconnectedEvent);
-
-      OtaEnabled = true;
     }
 
     void DisableOta()
     {
       if (!OtaEnabled || OtaIsUpdating)
         return;
+
+      OtaEnabled = false;
 
       if (Services::Wifi::IsConnected())
       {
@@ -103,8 +105,6 @@ namespace Services
 
       Hostname.clear();
       Password.clear();
-
-      OtaEnabled = false;
     }
 
     bool IsEnabled()
