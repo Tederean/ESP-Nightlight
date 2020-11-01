@@ -44,10 +44,7 @@ namespace Services
         restartTime += OneDay;
       }
 
-#ifdef SERIAL_DEBUG
-      Serial.print("ESP restart time: ");
-      Serial.println(Localtime.dateTime(restartTime, LOCAL_TIME));
-#endif
+      Debug("ESP restart time: " + Localtime.dateTime(restartTime, LOCAL_TIME) + "\n");
 
       Localtime.setEvent(OnSystemDailyRebootTimer, restartTime, LOCAL_TIME);
     }
@@ -62,24 +59,19 @@ namespace Services
     {
       WifiShutdownEvent.Unsubscribe(&OnWifiShutdownEvent);
 
-#ifdef SERIAL_DEBUG
       if (Services::Time::IsTimeSynced())
       {
-        Serial.println("Disconnecting from WiFi after await period has expired, everything ok!");
-      }
-      else
-      {
-        Serial.println("ESP is not able to connect to WiFi and/or NTP service.");
-        Serial.println("Rebooting ESP, hoping to fix issue with it.");
-        Serial.flush();
-      }
-#endif
+        Debug("Disconnecting from WiFi after await period has expired, everything ok!");
 
-      if (!Services::Time::IsTimeSynced())
-        ESP.restart();
+        Services::Ota::DisableOta();
+        Services::Wifi::DisableWifi();
+        return;
+      }
 
-      Services::Ota::DisableOta();
-      Services::Wifi::DisableWifi();
+      Debug("ESP is not able to connect to WiFi and/or NTP service.\nRebooting ESP, hoping to fix issue with it.\n");
+      DebugFlush();
+
+      ESP.restart();
     }
 
     void OnTimeSyncedEvent(void *args)

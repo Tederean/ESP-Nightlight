@@ -16,6 +16,12 @@ using namespace std;
 #define Debug(x)
 #endif
 
+#ifdef SERIAL_DEBUG
+#define DebugFlush(x) Serial.flush()
+#else
+#define DebugFlush(x)
+#endif
+
 namespace Services
 {
   namespace System
