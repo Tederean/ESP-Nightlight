@@ -4,10 +4,6 @@
 #include <framework/common/Event.h>
 #include <stdint.h>
 
-#if !defined(ESP8266) && !defined(ESP32)
-#error "Unkown or unsupported architecture!"
-#endif
-
 using namespace std;
 
 namespace Services
@@ -15,7 +11,7 @@ namespace Services
   namespace System
   {
 
-    void InitializeAllServices();
+    void Initialize();
 
     void InvokeOnce(Event<void> *event, int64_t delay_us);
 
