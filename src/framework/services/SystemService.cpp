@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <memory>
 #include <framework/services/SystemService.h>
 #include <framework/services/WifiService.h>
 #include <framework/services/OtaService.h>
@@ -21,23 +22,13 @@ namespace Services
 
     Event<void> LoopEvent;
 
-    vector<ScheduledEvent *> ScheduledTargets;
-
-    ScheduledEvent *CreateScheduledEvent()
-    {
-      return (ScheduledEvent *)malloc(sizeof(ScheduledEvent));
-    }
-
-    void DeleteScheduledEvent(ScheduledEvent *event)
-    {
-      free(event);
-    }
+    vector<shared_ptr<ScheduledEvent>> ScheduledTargets;
 
     int16_t FindEventIndex(Event<void> *eventToFind)
     {
       for (int16_t index = 0; index < ScheduledTargets.size(); ++index)
       {
-        ScheduledEvent *scheduledEvent = ScheduledTargets[index];
+        shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
 
         if (scheduledEvent->TargetEvent == eventToFind)
           return index;
@@ -55,20 +46,20 @@ namespace Services
 
       for (int16_t index = 0; index < ScheduledTargets.size(); ++index)
       {
-        ScheduledEvent *scheduledEvent = ScheduledTargets[index];
+        shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
 
         if (scheduledEvent->NextExecution_us > presentTime)
           continue;
 
         scheduledEvent->TargetEvent->Invoke(nullptr);
 
-        if (scheduledEvent->Interval_us > 0)
+        if (scheduledEvent->Interval_us <= 0)
         {
-          scheduledEvent->NextExecution_us += scheduledEvent->Interval_us;
+          TargetsToRemove.push_back(scheduledEvent->TargetEvent);
           continue;
         }
 
-        TargetsToRemove.push_back(scheduledEvent->TargetEvent);
+        scheduledEvent->NextExecution_us += scheduledEvent->Interval_us;
       }
 
       for (int16_t index = 0; index < TargetsToRemove.size(); ++index)
@@ -85,7 +76,7 @@ namespace Services
       {
         int64_t nextExecution_us = esp_timer_get_time() + firstDelay_us;
 
-        ScheduledEvent *scheduledEvent = CreateScheduledEvent();
+        shared_ptr<ScheduledEvent> scheduledEvent((ScheduledEvent *)malloc(sizeof(ScheduledEvent)));
         scheduledEvent->TargetEvent = event;
         scheduledEvent->NextExecution_us = nextExecution_us;
         scheduledEvent->Interval_us = interval_us;
@@ -105,16 +96,12 @@ namespace Services
 
       if (index >= 0)
       {
-        ScheduledEvent *scheduledEvent = ScheduledTargets[index];
-
         ScheduledTargets.erase(ScheduledTargets.begin() + index);
 
         if (ScheduledTargets.empty())
         {
           LoopEvent.Unsubscribe(&OnLoopEvent);
         }
-
-        DeleteScheduledEvent(scheduledEvent);
       }
     }
 
@@ -140,7 +127,6 @@ namespace Services
       Serial.setDebugOutput(true);
 #endif
 
-      Services::System::Initialize();
       Services::Wifi::Initialize();
       Services::Ota::Initialize();
       Services::Time::Initialize();
