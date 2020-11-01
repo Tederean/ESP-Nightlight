@@ -1,10 +1,6 @@
+#include <Arduino.h>
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
-//#include <stdint.h>
-//#include <stdlib.h>
-//#include <vector>
-//#include <esp_timer.h>
-#include <Arduino.h>
 
 using namespace std;
 

@@ -1,8 +1,8 @@
 #ifndef _SystemService_
 #define _SystemService_
 
+#include <Arduino.h>
 #include <framework/common/Event.h>
-#include <stdint.h>
 
 using namespace std;
 

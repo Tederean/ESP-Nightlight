@@ -1,7 +1,7 @@
 #ifndef _WifiService_
 #define _WifiService_
 
-#include <string>
+#include <Arduino.h>
 #include <framework/common/Event.h>
 
 using namespace std;

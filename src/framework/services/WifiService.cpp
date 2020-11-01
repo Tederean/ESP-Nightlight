@@ -1,12 +1,13 @@
-#include <framework/services/WifiService.h>
-#include <framework/common/Event.h>
-#include <string>
+#include <Arduino.h>
 
 #if defined(ESP8266)
 #include <ESP8266WiFi.h>
 #elif defined(ESP32)
 #include <WiFi.h>
 #endif
+
+#include <framework/services/WifiService.h>
+#include <framework/common/Event.h>
 
 using namespace std;
 

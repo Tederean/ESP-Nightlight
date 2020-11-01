@@ -1,7 +1,7 @@
 #ifndef _TimerService_
 #define _TimerService_
 
-#include <string>
+#include <Arduino.h>
 #include <framework/common/Event.h>
 
 using namespace std;

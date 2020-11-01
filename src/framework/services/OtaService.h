@@ -1,7 +1,7 @@
 #ifndef _OtaService_
 #define _OtaService_
 
-#include <string>
+#include <Arduino.h>
 
 using namespace std;
 

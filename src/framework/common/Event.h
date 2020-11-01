@@ -1,7 +1,7 @@
 #ifndef _Event_
 #define _Event_
 
-#include <vector>
+#include <Arduino.h>
 
 using namespace std;
 
