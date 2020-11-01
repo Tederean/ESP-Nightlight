@@ -1,5 +1,8 @@
 #include <Arduino.h>
 #include <framework/services/SystemService.h>
+#include <framework/services/WifiService.h>
+#include <framework/services/OtaService.h>
+#include <framework/services/TimeService.h>
 #include <framework/common/Event.h>
 
 using namespace std;
@@ -132,6 +135,15 @@ namespace Services
 
     void Initialize()
     {
+#ifdef SERIAL_DEBUG
+      Serial.begin(115200UL);
+      Serial.setDebugOutput(true);
+#endif
+
+      Services::System::Initialize();
+      Services::Wifi::Initialize();
+      Services::Ota::Initialize();
+      Services::Time::Initialize();
     }
 
   } // namespace System

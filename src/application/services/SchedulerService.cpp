@@ -1,11 +1,11 @@
+#include <Arduino.h>
+#include <ezTime.h>
 #include <application/services/SchedulerService.h>
 #include <framework/services/WifiService.h>
 #include <framework/services/OtaService.h>
 #include <framework/services/TimeService.h>
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
-#include <Arduino.h>
-#include <ezTime.h>
 
 using namespace std;
 
@@ -58,9 +58,9 @@ namespace Services
       Localtime.setDefault();
     }
 
-    void OnWifiShutdownTimer(void *args)
+    void OnWifiShutdownEvent(void *args)
     {
-      WifiShutdownEvent.Unsubscribe(&OnWifiShutdownTimer);
+      WifiShutdownEvent.Unsubscribe(&OnWifiShutdownEvent);
 
 #ifdef SERIAL_DEBUG
       if (Services::Time::IsTimeSynced())
@@ -106,7 +106,7 @@ namespace Services
     {
       int64_t shutdownDelay_us = WIFI_SHUTDOWN_TIME * 1000LL * 1000LL;
 
-      WifiShutdownEvent.Subscribe(&OnWifiShutdownTimer);
+      WifiShutdownEvent.Subscribe(&OnWifiShutdownEvent);
       Services::System::InvokeOnce(&WifiShutdownEvent, shutdownDelay_us);
 
       Services::Time::TimeSyncedEvent.Subscribe(&OnTimeSyncedEvent);

@@ -6,6 +6,16 @@
 
 using namespace std;
 
+#if !defined(ESP8266) && !defined(ESP32)
+#error "Unkown or unsupported architecture!"
+#endif
+
+#ifdef SERIAL_DEBUG
+#define Debug(x) Serial.print(x)
+#else
+#define Debug(x)
+#endif
+
 namespace Services
 {
   namespace System
