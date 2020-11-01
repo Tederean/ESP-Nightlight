@@ -2,7 +2,8 @@
 #include <framework/services/WifiService.h>
 #include <framework/services/OtaService.h>
 #include <framework/services/TimeService.h>
-#include <framework/common/Timer.h>
+#include <framework/services/SystemService.h>
+#include <framework/common/Event.h>
 #include <Arduino.h>
 #include <ezTime.h>
 
@@ -19,7 +20,7 @@ namespace Services
 
     const long OneDay = 3600L * 24L;
 
-    Timer<void> WifiShutdownTimer;
+    Event<void> WifiShutdownEvent;
 
     Timezone Localtime;
 
@@ -59,7 +60,7 @@ namespace Services
 
     void OnWifiShutdownTimer(void *args)
     {
-      WifiShutdownTimer.Unsubscribe(&OnWifiShutdownTimer);
+      WifiShutdownEvent.Unsubscribe(&OnWifiShutdownTimer);
 
 #ifdef SERIAL_DEBUG
       if (Services::Time::IsTimeSynced())
@@ -105,8 +106,8 @@ namespace Services
     {
       int64_t shutdownDelay_us = WIFI_SHUTDOWN_TIME * 1000LL * 1000LL;
 
-      WifiShutdownTimer.Subscribe(&OnWifiShutdownTimer);
-      WifiShutdownTimer.RunDelayed(shutdownDelay_us, nullptr);
+      WifiShutdownEvent.Subscribe(&OnWifiShutdownTimer);
+      Services::System::InvokeOnce(&WifiShutdownEvent, shutdownDelay_us);
 
       Services::Time::TimeSyncedEvent.Subscribe(&OnTimeSyncedEvent);
 

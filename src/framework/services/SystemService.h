@@ -2,6 +2,7 @@
 #define _SystemService_
 
 #include <framework/common/Event.h>
+#include <stdint.h>
 
 #if !defined(ESP8266) && !defined(ESP32)
 #error "Unkown or unsupported architecture!"
@@ -15,6 +16,12 @@ namespace Services
   {
 
     void InitializeAllServices();
+
+    void InvokeOnce(Event<void> *event, int64_t delay_us);
+
+    void InvokeRepeating(Event<void> *event, int64_t firstDelay_us, int64_t repeatingDelay_us);
+
+    void InvokeCancel(Event<void> *event);
 
     extern Event<void> LoopEvent;
 
