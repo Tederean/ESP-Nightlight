@@ -30,7 +30,7 @@ namespace Services
       {
         TimeSyncedEvent.Invoke(nullptr);
 
-        Services::System::LoopEvent.Unsubscribe(&OnLoopEventTimeSync);
+        Services::System::LoopEvent.Unsubscribe(OnLoopEventTimeSync);
 
         ezt::setInterval(0);
         TimeSynced = true;
@@ -47,8 +47,8 @@ namespace Services
 
       ezt::setServer(TZ_NTP_SERVER);
 
-      Services::System::LoopEvent.Subscribe(&OnLoopEvent);
-      Services::System::LoopEvent.Subscribe(&OnLoopEventTimeSync);
+      Services::System::LoopEvent.Subscribe(OnLoopEvent);
+      Services::System::LoopEvent.Subscribe(OnLoopEventTimeSync);
     }
 
   } // namespace Time

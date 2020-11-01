@@ -36,7 +36,7 @@ namespace Services
       ArduinoOTA.end();
 #endif
 
-      Services::System::LoopEvent.Unsubscribe(&OnLoopEvent);
+      Services::System::LoopEvent.Unsubscribe(OnLoopEvent);
     }
 
     void BeginOta()
@@ -52,7 +52,7 @@ namespace Services
       ArduinoOTA.begin();
 #endif
 
-      Services::System::LoopEvent.Subscribe(&OnLoopEvent);
+      Services::System::LoopEvent.Subscribe(OnLoopEvent);
     }
 
     void OnAccessPointDisconnectedEvent(void *args)
@@ -85,8 +85,8 @@ namespace Services
         EndOta();
       }
 
-      Services::Wifi::AccessPointConnectedEvent.Unsubscribe(&OnAccessPointConnectedEvent);
-      Services::Wifi::AccessPointDisconnectedEvent.Unsubscribe(&OnAccessPointDisconnectedEvent);
+      Services::Wifi::AccessPointConnectedEvent.Unsubscribe(OnAccessPointConnectedEvent);
+      Services::Wifi::AccessPointDisconnectedEvent.Unsubscribe(OnAccessPointDisconnectedEvent);
 
       Hostname.clear();
       Password.clear();
@@ -107,8 +107,8 @@ namespace Services
         BeginOta();
       }
 
-      Services::Wifi::AccessPointConnectedEvent.Subscribe(&OnAccessPointConnectedEvent);
-      Services::Wifi::AccessPointDisconnectedEvent.Subscribe(&OnAccessPointDisconnectedEvent);
+      Services::Wifi::AccessPointConnectedEvent.Subscribe(OnAccessPointConnectedEvent);
+      Services::Wifi::AccessPointDisconnectedEvent.Subscribe(OnAccessPointDisconnectedEvent);
 
       OtaEnabled = true;
     }

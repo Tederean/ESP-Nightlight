@@ -57,7 +57,7 @@ namespace Services
 
     void OnWifiShutdownEvent(void *args)
     {
-      WifiShutdownEvent.Unsubscribe(&OnWifiShutdownEvent);
+      WifiShutdownEvent.Unsubscribe(OnWifiShutdownEvent);
 
       if (Services::Time::IsTimeSynced())
       {
@@ -98,10 +98,10 @@ namespace Services
     {
       int64_t shutdownDelay_us = WIFI_SHUTDOWN_TIME * 1000LL * 1000LL;
 
-      WifiShutdownEvent.Subscribe(&OnWifiShutdownEvent);
+      WifiShutdownEvent.Subscribe(OnWifiShutdownEvent);
       Services::System::InvokeOnce(&WifiShutdownEvent, shutdownDelay_us);
 
-      Services::Time::TimeSyncedEvent.Subscribe(&OnTimeSyncedEvent);
+      Services::Time::TimeSyncedEvent.Subscribe(OnTimeSyncedEvent);
     }
 
   } // namespace Scheduler

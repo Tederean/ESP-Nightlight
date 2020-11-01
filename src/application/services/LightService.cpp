@@ -19,14 +19,14 @@ namespace Services
 
     void Initialize()
     {
-      Services::Time::TimeSyncedEvent.Subscribe(&OnTimeSyncedEvent);
+      Services::Time::TimeSyncedEvent.Subscribe(OnTimeSyncedEvent);
     }
 
     void OnTimeSyncedEvent(void *args)
     {
-      Services::Time::TimeSyncedEvent.Unsubscribe(&OnTimeSyncedEvent);
+      Services::Time::TimeSyncedEvent.Unsubscribe(OnTimeSyncedEvent);
 
-      Services::System::LoopEvent.Subscribe(&OnLoopEvent);
+      Services::System::LoopEvent.Subscribe(OnLoopEvent);
     }
 
     void OnLoopEvent(void *args)

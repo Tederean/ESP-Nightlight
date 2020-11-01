@@ -83,7 +83,7 @@ namespace Services
 
         if (ScheduledTargets.empty())
         {
-          LoopEvent.Subscribe(&OnLoopEvent);
+          LoopEvent.Subscribe(OnLoopEvent);
         }
 
         ScheduledTargets.push_back(scheduledEvent);
@@ -100,7 +100,7 @@ namespace Services
 
         if (ScheduledTargets.empty())
         {
-          LoopEvent.Unsubscribe(&OnLoopEvent);
+          LoopEvent.Unsubscribe(OnLoopEvent);
         }
       }
     }
