@@ -20,52 +20,51 @@ namespace Services
   namespace System
   {
 
+    void Initialize();
+
+    void InvokeOnce(Event<void> *event, int64_t delay_us);
+
+    void InvokeRepeating(Event<void> *event, int64_t firstDelay_us, int64_t repeatingDelay_us);
+
+    void InvokeCancel(Event<void> *event);
+
+    void AddEvent(Event<void> *event, int64_t firstDelay_us, int64_t interval_us);
+
+    void RemoveEvent(Event<void> *event);
+
+    int16_t FindEventIndex(Event<void> *eventToFind);
+
+    void OnLoopEvent(void *args);
+
     Event<void> LoopEvent;
 
     vector<shared_ptr<ScheduledEvent>> ScheduledTargets;
 
-    int16_t FindEventIndex(Event<void> *eventToFind)
+    void Initialize()
     {
-      for (int16_t index = 0; index < ScheduledTargets.size(); ++index)
-      {
-        shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
+#ifdef SERIAL_DEBUG
+      Serial.begin(115200UL);
+      Serial.setDebugOutput(true);
+#endif
 
-        if (scheduledEvent->TargetEvent == eventToFind)
-          return index;
-      }
-
-      return -1;
+      Services::Wifi::Initialize();
+      Services::Ota::Initialize();
+      Services::Time::Initialize();
     }
 
-    void RemoveEvent(Event<void> *event);
-
-    void OnLoopEvent(void *args)
+    void InvokeOnce(Event<void> *event, int64_t delay_us)
     {
-      vector<Event<void> *> TargetsToRemove;
-      int64_t presentTime = esp_timer_get_time();
+      AddEvent(event, delay_us, -1);
+    }
 
-      for (int16_t index = 0; index < ScheduledTargets.size(); ++index)
-      {
-        shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
+    void InvokeRepeating(Event<void> *event, int64_t firstDelay_us, int64_t repeatingDelay_us)
+    {
+      AddEvent(event, firstDelay_us, repeatingDelay_us);
+    }
 
-        if (scheduledEvent->NextExecution_us > presentTime)
-          continue;
-
-        scheduledEvent->TargetEvent->Invoke(nullptr);
-
-        if (scheduledEvent->Interval_us <= 0)
-        {
-          TargetsToRemove.push_back(scheduledEvent->TargetEvent);
-          continue;
-        }
-
-        scheduledEvent->NextExecution_us += scheduledEvent->Interval_us;
-      }
-
-      for (int16_t index = 0; index < TargetsToRemove.size(); ++index)
-      {
-        RemoveEvent(TargetsToRemove[index]);
-      }
+    void InvokeCancel(Event<void> *event)
+    {
+      RemoveEvent(event);
     }
 
     void AddEvent(Event<void> *event, int64_t firstDelay_us, int64_t interval_us)
@@ -105,31 +104,46 @@ namespace Services
       }
     }
 
-    void InvokeOnce(Event<void> *event, int64_t delay_us)
+    int16_t FindEventIndex(Event<void> *eventToFind)
     {
-      AddEvent(event, delay_us, -1);
+      for (int16_t index = 0; index < ScheduledTargets.size(); ++index)
+      {
+        shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
+
+        if (scheduledEvent->TargetEvent == eventToFind)
+          return index;
+      }
+
+      return -1;
     }
 
-    void InvokeRepeating(Event<void> *event, int64_t firstDelay_us, int64_t repeatingDelay_us)
+    void OnLoopEvent(void *args)
     {
-      AddEvent(event, firstDelay_us, repeatingDelay_us);
-    }
+      vector<Event<void> *> TargetsToRemove;
+      int64_t presentTime = esp_timer_get_time();
 
-    void InvokeCancel(Event<void> *event)
-    {
-      RemoveEvent(event);
-    }
+      for (int16_t index = 0; index < ScheduledTargets.size(); ++index)
+      {
+        shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
 
-    void Initialize()
-    {
-#ifdef SERIAL_DEBUG
-      Serial.begin(115200UL);
-      Serial.setDebugOutput(true);
-#endif
+        if (scheduledEvent->NextExecution_us > presentTime)
+          continue;
 
-      Services::Wifi::Initialize();
-      Services::Ota::Initialize();
-      Services::Time::Initialize();
+        scheduledEvent->TargetEvent->Invoke(nullptr);
+
+        if (scheduledEvent->Interval_us <= 0)
+        {
+          TargetsToRemove.push_back(scheduledEvent->TargetEvent);
+          continue;
+        }
+
+        scheduledEvent->NextExecution_us += scheduledEvent->Interval_us;
+      }
+
+      for (int16_t index = 0; index < TargetsToRemove.size(); ++index)
+      {
+        RemoveEvent(TargetsToRemove[index]);
+      }
     }
 
   } // namespace System

@@ -11,6 +11,26 @@ namespace Services
   namespace Ota
   {
 
+    void Initialize();
+
+    void EnableOta(string hostname, string password);
+
+    void DisableOta();
+
+    bool IsEnabled();
+
+    bool IsUpdating();
+
+    void BeginOta();
+
+    void EndOta();
+
+    void OnLoopEvent(void *args);
+
+    void OnAccessPointConnectedEvent(void *args);
+
+    void OnAccessPointDisconnectedEvent(void *args);
+
     string Password;
 
     string Hostname;
@@ -25,73 +45,28 @@ namespace Services
 
     Event<void> UpdateErrorEvent;
 
-    void OnLoopEvent(void *args)
+    void Initialize()
     {
-      ArduinoOTA.handle();
-    }
-
-    void EndOta()
-    {
-#if defined(ESP32)
-      ArduinoOTA.end();
-#endif
-
-      Services::System::LoopEvent.Unsubscribe(OnLoopEvent);
-    }
-
-    void BeginOta()
-    {
-      ArduinoOTA.setHostname(Hostname.c_str());
-      ArduinoOTA.setPassword((const char *)Password.c_str());
-      ArduinoOTA.setPort(8266);
-
-#if defined(ESP8266)
-      ArduinoOTA.begin(true);
-#elif defined(ESP32)
-      ArduinoOTA.setMdnsEnabled(true);
-      ArduinoOTA.begin();
-#endif
-
-      Services::System::LoopEvent.Subscribe(OnLoopEvent);
-    }
-
-    void OnAccessPointDisconnectedEvent(void *args)
-    {
-      EndOta();
-    }
-
-    void OnAccessPointConnectedEvent(void *args)
-    {
-      BeginOta();
-    }
-
-    bool IsEnabled()
-    {
-      return OtaEnabled;
-    }
-
-    bool IsUpdating()
-    {
-      return OtaIsUpdating;
-    }
-
-    void DisableOta()
-    {
-      if (!OtaEnabled || OtaIsUpdating)
-        return;
-
-      if (Services::Wifi::IsConnected())
-      {
-        EndOta();
-      }
-
-      Services::Wifi::AccessPointConnectedEvent.Unsubscribe(OnAccessPointConnectedEvent);
-      Services::Wifi::AccessPointDisconnectedEvent.Unsubscribe(OnAccessPointDisconnectedEvent);
-
-      Hostname.clear();
-      Password.clear();
-
       OtaEnabled = false;
+      OtaIsUpdating = false;
+
+      ArduinoOTA.onStart([] {
+        UpdateStartEvent.Invoke(nullptr);
+
+        OtaIsUpdating = true;
+      });
+
+      ArduinoOTA.onEnd([] {
+        UpdateEndEvent.Invoke(nullptr);
+
+        OtaIsUpdating = false;
+      });
+
+      ArduinoOTA.onError([](ota_error_t error) {
+        UpdateErrorEvent.Invoke(nullptr);
+
+        OtaIsUpdating = false;
+      });
     }
 
     void EnableOta(string hostname, string password)
@@ -113,31 +88,73 @@ namespace Services
       OtaEnabled = true;
     }
 
-    void Initialize()
+    void DisableOta()
     {
+      if (!OtaEnabled || OtaIsUpdating)
+        return;
+
+      if (Services::Wifi::IsConnected())
+      {
+        EndOta();
+      }
+
+      Services::Wifi::AccessPointConnectedEvent.Unsubscribe(OnAccessPointConnectedEvent);
+      Services::Wifi::AccessPointDisconnectedEvent.Unsubscribe(OnAccessPointDisconnectedEvent);
+
+      Hostname.clear();
+      Password.clear();
+
       OtaEnabled = false;
-      OtaIsUpdating = false;
+    }
 
-      ArduinoOTA.onStart([]
-      {
-        UpdateStartEvent.Invoke(nullptr);
+    bool IsEnabled()
+    {
+      return OtaEnabled;
+    }
 
-        OtaIsUpdating = true;
-      });
+    bool IsUpdating()
+    {
+      return OtaIsUpdating;
+    }
 
-      ArduinoOTA.onEnd([]
-      {
-        UpdateEndEvent.Invoke(nullptr);
+    void BeginOta()
+    {
+      ArduinoOTA.setHostname(Hostname.c_str());
+      ArduinoOTA.setPassword((const char *)Password.c_str());
+      ArduinoOTA.setPort(8266);
 
-        OtaIsUpdating = false;
-      });
+#if defined(ESP8266)
+      ArduinoOTA.begin(true);
+#elif defined(ESP32)
+      ArduinoOTA.setMdnsEnabled(true);
+      ArduinoOTA.begin();
+#endif
 
-      ArduinoOTA.onError([](ota_error_t error)
-      {
-        UpdateErrorEvent.Invoke(nullptr);
+      Services::System::LoopEvent.Subscribe(OnLoopEvent);
+    }
 
-        OtaIsUpdating = false;
-      });
+    void EndOta()
+    {
+#if defined(ESP32)
+      ArduinoOTA.end();
+#endif
+
+      Services::System::LoopEvent.Unsubscribe(OnLoopEvent);
+    }
+
+    void OnLoopEvent(void *args)
+    {
+      ArduinoOTA.handle();
+    }
+
+    void OnAccessPointConnectedEvent(void *args)
+    {
+      BeginOta();
+    }
+
+    void OnAccessPointDisconnectedEvent(void *args)
+    {
+      EndOta();
     }
 
   } // namespace Ota

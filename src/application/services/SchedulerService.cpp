@@ -80,8 +80,6 @@ namespace Services
 
       InitializeTimeZone();
       SetupDailyRestart();
-
-      // TODO: Enable light
     }
 
     void OnSystemDailyRebootTimer()

@@ -28,6 +28,7 @@ namespace Services
     extern Event<void> AccessPointConnectedEvent;
 
     extern Event<void> AccessPointDisconnectedEvent;
+
   } // namespace Wifi
 } // namespace Services
 

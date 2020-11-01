@@ -16,6 +16,36 @@ namespace Services
   namespace Wifi
   {
 
+    void Initialize();
+
+    void EnableWifi(string ssid, string password, string hostname);
+
+    void ConnectToWifi();
+
+    void DisableWifi();
+
+    void DisconnectFromWifi();
+
+    bool IsEnabled();
+
+    bool IsConnected();
+
+#if defined(ESP32)
+
+    void OnWifiEvent(WiFiEvent_t event);
+
+#elif defined(ESP8266)
+
+    void OnWifiConnect(const WiFiEventStationModeGotIP &event);
+
+    void OnWifiDisconnect(const WiFiEventStationModeDisconnected &event);
+
+#endif
+
+    void OnAccessPointConnected();
+
+    void OnAccessPointDisconnected();
+
     string SSID;
 
     string Password;
@@ -40,24 +70,79 @@ namespace Services
 
     Event<void> WifiDisablingEvent;
 
-    void OnAccessPointDisconnected()
+    void Initialize()
     {
-      if (WifiConnected)
-      {
-        AccessPointDisconnectedEvent.Invoke(nullptr);
+      WifiEnabled = false;
+      WifiConnected = false;
 
-        WifiConnected = false;
-      }
+#if defined(ESP8266)
+      WifiConnectHandler = WiFi.onStationModeGotIP(OnWifiConnect);
+      WifiDisconnectHandler = WiFi.onStationModeDisconnected(OnWifiDisconnect);
+#elif defined(ESP32)
+      WiFi.onEvent(OnWifiEvent);
+#endif
     }
 
-    void OnAccessPointConnected()
+    void EnableWifi(string ssid, string password, string hostname)
     {
-      AccessPointConnectedEvent.Invoke(nullptr);
+      if (WifiEnabled)
+        return;
 
-      WifiConnected = true;
+      SSID.assign(ssid);
+      Password.assign(password);
+      Hostname.assign(hostname);
+
+      WifiEnablingEvent.Invoke(nullptr);
+
+      ConnectToWifi();
+
+      WifiEnabled = true;
+    }
+
+    void ConnectToWifi()
+    {
+      WiFi.begin(SSID.c_str(), Password.c_str());
+
+#if defined(ESP8266)
+      WiFi.hostname(Hostname.c_str());
+#elif defined(ESP32)
+      WiFi.setHostname(Hostname.c_str());
+#endif
+    }
+
+    void DisableWifi()
+    {
+      if (!WifiEnabled)
+        return;
+
+      WifiDisablingEvent.Invoke(nullptr);
+
+      DisconnectFromWifi();
+
+      SSID.clear();
+      Password.clear();
+      Hostname.clear();
+
+      WifiEnabled = false;
+    }
+
+    void DisconnectFromWifi()
+    {
+      WiFi.disconnect(true);
+    }
+
+    bool IsEnabled()
+    {
+      return WifiEnabled;
+    }
+
+    bool IsConnected()
+    {
+      return WifiConnected;
     }
 
 #if defined(ESP32)
+
     void OnWifiEvent(WiFiEvent_t event)
     {
       switch (event)
@@ -101,87 +186,34 @@ namespace Services
 
 #elif defined(ESP8266)
 
-    void OnWifiDisconnect(const WiFiEventStationModeDisconnected &event)
-    {
-      OnAccessPointDisconnected();
-    }
-
     void OnWifiConnect(const WiFiEventStationModeGotIP &event)
     {
       OnAccessPointConnected();
     }
 
+    void OnWifiDisconnect(const WiFiEventStationModeDisconnected &event)
+    {
+      OnAccessPointDisconnected();
+    }
+
 #endif
 
-    void DisconnectFromWifi()
+    void OnAccessPointConnected()
     {
-      WiFi.disconnect(true);
+      AccessPointConnectedEvent.Invoke(nullptr);
+
+      WifiConnected = true;
     }
 
-    void ConnectToWifi()
+    void OnAccessPointDisconnected()
     {
-      WiFi.begin(SSID.c_str(), Password.c_str());
+      if (WifiConnected)
+      {
+        AccessPointDisconnectedEvent.Invoke(nullptr);
 
-#if defined(ESP8266)
-      WiFi.hostname(Hostname.c_str());
-#elif defined(ESP32)
-      WiFi.setHostname(Hostname.c_str());
-#endif
+        WifiConnected = false;
+      }
     }
 
-    bool IsConnected()
-    {
-      return WifiConnected;
-    }
-
-    bool IsEnabled()
-    {
-      return WifiEnabled;
-    }
-
-    void DisableWifi()
-    {
-      if (!WifiEnabled)
-        return;
-
-      WifiDisablingEvent.Invoke(nullptr);
-
-      DisconnectFromWifi();
-
-      SSID.clear();
-      Password.clear();
-      Hostname.clear();
-
-      WifiEnabled = false;
-    }
-
-    void EnableWifi(string ssid, string password, string hostname)
-    {
-      if (WifiEnabled)
-        return;
-
-      SSID.assign(ssid);
-      Password.assign(password);
-      Hostname.assign(hostname);
-
-      WifiEnablingEvent.Invoke(nullptr);
-
-      ConnectToWifi();
-
-      WifiEnabled = true;
-    }
-
-    void Initialize()
-    {
-      WifiEnabled = false;
-      WifiConnected = false;
-
-#if defined(ESP8266)
-      WifiConnectHandler = WiFi.onStationModeGotIP(OnWifiConnect);
-      WifiDisconnectHandler = WiFi.onStationModeDisconnected(OnWifiDisconnect);
-#elif defined(ESP32)
-      WiFi.onEvent(OnWifiEvent);
-#endif
-    }
   } // namespace Wifi
 } // namespace Services

@@ -10,9 +10,31 @@ namespace Services
   namespace Time
   {
 
+    void Initialize();
+
+    bool IsTimeSynced();
+
+    void OnLoopEvent(void *args);
+
+    void OnLoopEventTimeSync(void *args);
+
     Event<void> TimeSyncedEvent;
 
     bool TimeSynced;
+
+    void Initialize()
+    {
+      TimeSynced = false;
+
+#ifdef SERIAL_DEBUG
+      ezt::setDebug(INFO);
+#endif
+
+      ezt::setServer(TZ_NTP_SERVER);
+
+      Services::System::LoopEvent.Subscribe(OnLoopEvent);
+      Services::System::LoopEvent.Subscribe(OnLoopEventTimeSync);
+    }
 
     bool IsTimeSynced()
     {
@@ -35,20 +57,6 @@ namespace Services
         ezt::setInterval(0);
         TimeSynced = true;
       }
-    }
-
-    void Initialize()
-    {
-      TimeSynced = false;
-
-#ifdef SERIAL_DEBUG
-      ezt::setDebug(INFO);
-#endif
-
-      ezt::setServer(TZ_NTP_SERVER);
-
-      Services::System::LoopEvent.Subscribe(OnLoopEvent);
-      Services::System::LoopEvent.Subscribe(OnLoopEventTimeSync);
     }
 
   } // namespace Time
