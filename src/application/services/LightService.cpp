@@ -12,7 +12,7 @@ namespace Services
   {
 
     void Initialize();
-
+    
     void OnTimeSyncedEvent(void *args);
 
     void OnLoopEvent(void *args);
