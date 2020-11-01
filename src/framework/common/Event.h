@@ -33,7 +33,9 @@ public:
 
   void Invoke(T *handler)
   {
-    for (auto target : ExecutionTargets)
+    vector<void (*)(T*)> copyOfExecutionTargets = ExecutionTargets;
+
+    for (auto target : copyOfExecutionTargets)
     {
       target(handler);
     }

@@ -102,9 +102,6 @@ namespace Services
       Services::System::InvokeOnce(&WifiShutdownEvent, shutdownDelay_us);
 
       Services::Time::TimeSyncedEvent.Subscribe(&OnTimeSyncedEvent);
-
-      Services::Wifi::EnableWifi(WIFI_SSID, WIFI_PSK, WIFI_NAME);
-      Services::Ota::EnableOta(WIFI_NAME, WIFI_NAME);
     }
 
   } // namespace Scheduler
