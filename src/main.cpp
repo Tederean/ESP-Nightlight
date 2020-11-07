@@ -7,10 +7,6 @@
 #include <framework/services/OtaService.h>
 #include <framework/services/TimeService.h>
 
-#include <application/common/PWMChannel.h>
-
-PWMChannel channel(8, false);
-
 void loop()
 {
 	Services::System::LoopEvent.Invoke(nullptr);
@@ -26,8 +22,6 @@ void setup()
 	Services::Light::Initialize();
 	Services::Network::Initialize();
 	Services::Reboot::Initialize();
-
-	channel.Initialize();
 }
 
 /*
