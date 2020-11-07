@@ -51,6 +51,8 @@ namespace Services
 
       Debug("ESP restart time: " + localtime->dateTime(rebootTime, LOCAL_TIME) + "\n");
 
+      DailyMiddayRebootEvent.Subscribe(OnDailyMiddayRebootEvent);
+
       localtime->setEvent([] { DailyMiddayRebootEvent.Invoke(nullptr); }, rebootTime, LOCAL_TIME);
     }
 
