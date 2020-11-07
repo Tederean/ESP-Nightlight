@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <framework/utils/Math.h>
-#include <application/common/PWMChannel.h>
+#include <framework/peripherals/PWMChannel.h>
 
 using namespace std;
 

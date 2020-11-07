@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <application/services/LightService.h>
-#include <application/common/SunMath.h>
+#include <application/common/SolarMath.h>
 #include <framework/services/TimeService.h>
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
@@ -37,7 +37,11 @@ namespace Services
 
     void OnCalculateSunAngleEvent(void *args)
     {
-      SunMath::Test();
+      auto timezone = &Services::Time::Localtime;
+      auto currentTime = timezone->now();
+      auto angle = SolarMath::GetSolarElevation_degree(currentTime, timezone, LATITUDE);
+
+      Serial.println(angle, 4);
     }
 
   } // namespace Light
