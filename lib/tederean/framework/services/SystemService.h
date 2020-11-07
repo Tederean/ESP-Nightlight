@@ -29,6 +29,8 @@ namespace Services
 
     void Initialize();
 
+    int64_t GetUptime_us();
+
     void InvokeOnce(Event<void> *event, int64_t delay_us);
 
     void InvokeRepeating(Event<void> *event, int64_t firstDelay_us, int64_t repeatingDelay_us);

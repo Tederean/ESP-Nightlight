@@ -19,6 +19,8 @@ namespace Services
 
     void Initialize();
 
+    int64_t GetUptime_us();
+
     void InvokeOnce(Event<void> *event, int64_t delay_us);
 
     void InvokeRepeating(Event<void> *event, int64_t firstDelay_us, int64_t repeatingDelay_us);
@@ -45,6 +47,15 @@ namespace Services
 #endif
     }
 
+    int64_t GetUptime_us()
+    {
+#if defined(ESP32)
+      return esp_timer_get_time();
+#elif defined(ESP8266)
+      return micros64();
+#endif
+    }
+
     void InvokeOnce(Event<void> *event, int64_t delay_us)
     {
       AddEvent(event, delay_us, -1);
@@ -66,7 +77,7 @@ namespace Services
 
       if (index < 0)
       {
-        int64_t nextExecution_us = esp_timer_get_time() + firstDelay_us;
+        int64_t nextExecution_us = GetUptime_us() + firstDelay_us;
 
         shared_ptr<ScheduledEvent> scheduledEvent((ScheduledEvent *)malloc(sizeof(ScheduledEvent)));
         scheduledEvent->TargetEvent = event;
@@ -99,7 +110,7 @@ namespace Services
 
     int16_t FindEventIndex(Event<void> *eventToFind)
     {
-      for (int16_t index = 0; index < ScheduledTargets.size(); ++index)
+      for (size_t index = 0; index < ScheduledTargets.size(); ++index)
       {
         shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
 
@@ -113,9 +124,9 @@ namespace Services
     void OnLoopEvent(void *args)
     {
       vector<Event<void> *> TargetsToRemove;
-      int64_t presentTime = esp_timer_get_time();
+      int64_t presentTime = GetUptime_us();
 
-      for (int16_t index = 0; index < ScheduledTargets.size(); ++index)
+      for (size_t index = 0; index < ScheduledTargets.size(); ++index)
       {
         shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
 
@@ -133,7 +144,7 @@ namespace Services
         scheduledEvent->NextExecution_us += scheduledEvent->Interval_us;
       }
 
-      for (int16_t index = 0; index < TargetsToRemove.size(); ++index)
+      for (size_t index = 0; index < TargetsToRemove.size(); ++index)
       {
         RemoveEvent(TargetsToRemove[index]);
       }

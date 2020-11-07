@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <application/services/LightService.h>
+#include <application/common/SunMath.h>
 #include <framework/services/TimeService.h>
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
@@ -10,12 +11,16 @@ namespace Services
 {
   namespace Light
   {
-
+    
     void Initialize();
     
     void OnTimeSyncedEvent(void *args);
 
-    void OnLoopEvent(void *args);
+    void OnCalculateSunAngleEvent(void *args);
+
+    const int64_t OneSecond = 1000LL * 1000LL;
+
+    Event<void> CalculateSunAngleEvent;
 
     void Initialize()
     {
@@ -26,12 +31,13 @@ namespace Services
     {
       Services::Time::TimeSyncedEvent.Unsubscribe(OnTimeSyncedEvent);
 
-      Services::System::LoopEvent.Subscribe(OnLoopEvent);
+      CalculateSunAngleEvent.Subscribe(OnCalculateSunAngleEvent);
+      Services::System::InvokeRepeating(&CalculateSunAngleEvent, OneSecond, OneSecond);
     }
 
-    void OnLoopEvent(void *args)
+    void OnCalculateSunAngleEvent(void *args)
     {
-      // TODO: Handle light calculation here
+      SunMath::Test();
     }
 
   } // namespace Light

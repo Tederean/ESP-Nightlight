@@ -61,11 +61,11 @@ void PWMChannel::Initialize()
 #if defined(ESP8266)
   else if (ChannelType == LightChannelType::ESP8266PWM)
   {
-    uint16_t resolution_counts = ResolutionToCounts(resolution_bit);
+    uint16_t resolution_counts = ResolutionToCounts(Resolution_bit);
 
     analogWriteFreq(Frequency_Hz);
-        analogWriteRange(pow(resolution_counts);
-        pinMode(Pin, OUTPUT);
+    analogWriteRange(resolution_counts);
+    pinMode(Pin, OUTPUT);
   }
 #endif
 
