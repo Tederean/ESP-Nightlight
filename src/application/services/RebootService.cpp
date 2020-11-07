@@ -14,11 +14,11 @@ namespace Services
 
     void Initialize();
 
-    void SetupDailyMiddayReboot();
-
     void OnNetworkTimeoutRebootEvent(void *args);
 
     void OnTimeSyncedEvent(void *args);
+
+    void SetupDailyMiddayReboot();
 
     void OnDailyMiddayRebootEvent(void *args);
 
@@ -44,33 +44,11 @@ namespace Services
       Services::Time::TimeSyncedEvent.Subscribe(OnTimeSyncedEvent);
     }
 
-    void SetupDailyMiddayReboot()
-    {
-      time_t rebootTime = GetDailyMiddayRebootTime();
-      Timezone *localtime = &Services::Time::Localtime;
-
-      Debug("ESP restart time: " + localtime->dateTime(rebootTime, LOCAL_TIME) + "\n");
-
-      DailyMiddayRebootEvent.Subscribe(OnDailyMiddayRebootEvent);
-
-      localtime->setEvent([] { DailyMiddayRebootEvent.Invoke(nullptr); }, rebootTime, LOCAL_TIME);
-    }
-
     void OnNetworkTimeoutRebootEvent(void *args)
     {
       NetworkTimeoutRebootEvent.Unsubscribe(OnNetworkTimeoutRebootEvent);
 
       Debug("ESP is not able to connect to WiFi and/or NTP service.\nRebooting ESP, hoping to fix issue with it.\n");
-      DebugFlush();
-
-      ESP.restart();
-    }
-
-    void OnDailyMiddayRebootEvent(void *args)
-    {
-      DailyMiddayRebootEvent.Unsubscribe(OnDailyMiddayRebootEvent);
-
-      Debug("Daily midday reboot!.\n");
       DebugFlush();
 
       ESP.restart();
@@ -84,6 +62,28 @@ namespace Services
       Services::System::InvokeCancel(&NetworkTimeoutRebootEvent);
 
       SetupDailyMiddayReboot();
+    }
+
+    void SetupDailyMiddayReboot()
+    {
+      time_t rebootTime = GetDailyMiddayRebootTime();
+      Timezone *localtime = &Services::Time::Localtime;
+
+      Debug("ESP restart time: " + localtime->dateTime(rebootTime, LOCAL_TIME) + "\n");
+
+      DailyMiddayRebootEvent.Subscribe(OnDailyMiddayRebootEvent);
+
+      localtime->setEvent([] { DailyMiddayRebootEvent.Invoke(nullptr); }, rebootTime, LOCAL_TIME);
+    }
+
+    void OnDailyMiddayRebootEvent(void *args)
+    {
+      DailyMiddayRebootEvent.Unsubscribe(OnDailyMiddayRebootEvent);
+
+      Debug("Daily midday reboot!.\n");
+      DebugFlush();
+
+      ESP.restart();
     }
 
     time_t GetDailyMiddayRebootTime()
