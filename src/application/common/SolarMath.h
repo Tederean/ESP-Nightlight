@@ -11,6 +11,8 @@ namespace SolarMath
 
   double GetSolarElevationAngle(time_t time, Timezone *timezone, double latitude);
 
+  double SolarAngleToLightRatio(double value);
+  
 } // namespace SolarMath
 
 #endif

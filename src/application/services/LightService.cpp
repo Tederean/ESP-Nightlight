@@ -39,24 +39,14 @@ namespace Services
     {
       auto timezone = &Services::Time::Localtime;
       auto currentTime = timezone->now();
-      auto angle = SolarMath::GetSolarElevationAngle(currentTime, timezone, LATITUDE);
 
-      Serial.println(angle, 4);
-    }
+      auto solarAngle = SolarMath::GetSolarElevationAngle(currentTime, timezone, LATITUDE);
+      auto solarRatio = SolarMath::SolarAngleToLightRatio(solarAngle);
 
-
-
-
-
-    double SolarAngleToLightRatio(double value)
-    {
-      if (value >= 0.0)
-        return 0.0;
-
-      if (value <= -6.0)
-        return 1.0;
-
-      return (-50.0 / 300.0) * value;
+      Serial.print("Angle: ");
+      Serial.print(solarAngle, 4);
+      Serial.print(" Ratio: ");
+      Serial.println(solarRatio, 4);
     }
 
   } // namespace Light
