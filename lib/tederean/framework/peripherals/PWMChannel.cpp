@@ -69,10 +69,17 @@ void PWMChannel::Initialize()
   }
 #endif
 
-  Write(PwmMinValue);
+  WriteCounts(PwmMinValue);
 }
 
-void PWMChannel::Write(uint16_t value)
+void PWMChannel::WriteRatio(double ratio)
+{
+  uint16_t counts = round(Math::Map<double>(ratio, 0.0, 1.0, PwmMinValue, PwmMaxValue));
+
+  WriteCounts(counts);
+}
+
+void PWMChannel::WriteCounts(uint16_t value)
 {
   value = Math::Clamp<uint16_t>(value, PwmMinValue, PwmMaxValue);
 

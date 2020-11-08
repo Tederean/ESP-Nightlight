@@ -45,7 +45,9 @@ public:
 
   void Initialize();
 
-  void Write(uint16_t value);
+  void WriteCounts(uint16_t value);
+
+  void WriteRatio(double ratio);
 };
 
 #endif

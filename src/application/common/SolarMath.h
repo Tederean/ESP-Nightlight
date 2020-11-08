@@ -9,8 +9,8 @@ using namespace std;
 namespace SolarMath
 {
 
-  double GetSolarElevation_degree(time_t time, Timezone *timezone, double latitude);
+  double GetSolarElevationAngle(time_t time, Timezone *timezone, double latitude);
 
-} // namespace SunMath
+} // namespace SolarMath
 
 #endif

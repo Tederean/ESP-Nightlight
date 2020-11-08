@@ -11,9 +11,9 @@ namespace Services
 {
   namespace Light
   {
-    
+
     void Initialize();
-    
+
     void OnTimeSyncedEvent(void *args);
 
     void OnCalculateSunAngleEvent(void *args);
@@ -39,9 +39,24 @@ namespace Services
     {
       auto timezone = &Services::Time::Localtime;
       auto currentTime = timezone->now();
-      auto angle = SolarMath::GetSolarElevation_degree(currentTime, timezone, LATITUDE);
+      auto angle = SolarMath::GetSolarElevationAngle(currentTime, timezone, LATITUDE);
 
       Serial.println(angle, 4);
+    }
+
+
+
+
+
+    double SolarAngleToLightRatio(double value)
+    {
+      if (value >= 0.0)
+        return 0.0;
+
+      if (value <= -6.0)
+        return 1.0;
+
+      return (-50.0 / 300.0) * value;
     }
 
   } // namespace Light
