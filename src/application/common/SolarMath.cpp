@@ -16,7 +16,7 @@ namespace SolarMath
     }
 
     auto dayOfYear = timezone->dayOfYear(time, UTC_TIME);
-    auto hoursOfDay = Time::GetSecondsOfDay(timezone, time, UTC_TIME) / 3600.0;
+    auto hoursOfDay = Time::GetSecondsOfDay<double>(timezone, time, UTC_TIME) / 3600.0;
 
     // Here the magic beginns.
 

@@ -50,19 +50,22 @@ namespace Services
       OtaEnabled = false;
       OtaIsUpdating = false;
 
-      ArduinoOTA.onStart([] {
+      ArduinoOTA.onStart([]
+      {
         UpdateStartEvent.Invoke(nullptr);
 
         OtaIsUpdating = true;
       });
 
-      ArduinoOTA.onEnd([] {
+      ArduinoOTA.onEnd([]
+      {
         UpdateEndEvent.Invoke(nullptr);
 
         OtaIsUpdating = false;
       });
 
-      ArduinoOTA.onError([](ota_error_t error) {
+      ArduinoOTA.onError([](ota_error_t error)
+      {
         UpdateErrorEvent.Invoke(nullptr);
 
         OtaIsUpdating = false;

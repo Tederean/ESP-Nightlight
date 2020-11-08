@@ -1,5 +1,5 @@
-#ifndef _LightChannelConfig_
-#define _LightChannelConfig_
+#ifndef _PWMChannel_
+#define _PWMChannel_
 
 #include <Arduino.h>
 
@@ -16,6 +16,7 @@ class PWMChannel
 {
 
 private:
+
   LightChannelType ChannelType;
 
   uint8_t Pin;
@@ -37,6 +38,7 @@ private:
   uint16_t ResolutionToCounts(uint8_t resolution_bit);
 
 public:
+
   PWMChannel(uint8_t pin, bool invertSignal);
 
   PWMChannel(uint8_t pin, bool invertSignal, double frequency_Hz, uint8_t resolution_bit, uint8_t ledChannel, double pwmMinRatio = 0.0, double pwmMaxRatio = 1.0);
