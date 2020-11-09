@@ -2,6 +2,7 @@
 #include <application/services/LightService.h>
 #include <application/common/SolarMath.h>
 #include <application/common/LightingRule.h>
+#include <framework/peripherals/PWMChannel.h>
 #include <framework/services/TimeService.h>
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
@@ -17,17 +18,21 @@ namespace Services
 
     void OnTimeSyncedEvent(void *args);
 
-    void OnCalculateSunAngleEvent(void *args);
+    void OnLoopEvent(void *args);
 
-    const int64_t OneSecond = 1000LL * 1000LL;
+#if (PWM_RESOLUTION == 1) 
+    PWMChannel Channel(PWM_PIN, PWM_INVERTED);
+#elif defined(ESP32)
+    PWMChannel Channel(PWM_PIN, PWM_INVERTED, PWM_FREQUENCY, PWM_RESOLUTION, PWM_CHANNEL, 0.0, PWM_RATIO);
+#elif defined(ESP8266)
+    PWMChannel Channel(PWM_PIN, PWM_INVERTED, PWM_FREQUENCY, PWM_RESOLUTION, 0.0, PWM_RATIO);
+#endif
 
     LightingRule RuleForLighting;
 
-    Event<void> CalculateSunAngleEvent;
-
     void Initialize()
     {
-      Services::Time::TimeSyncedEvent.Subscribe(OnTimeSyncedEvent);
+      Channel.Initialize();
 
       TimeOfDay morningTransitionStart = {MORNING_TRANSITION_START};
       TimeOfDay morningTransitionStop = {MORNING_TRANSITION_STOP};
@@ -36,31 +41,28 @@ namespace Services
       TimeOfDay afternoonTransitionStop = {AFTERNOON_TRANSITION_STOP};
 
       RuleForLighting.SetRule(morningTransitionStart, morningTransitionStop, afternoonTransitionStart, afternoonTransitionStop);
+
+      Services::Time::TimeSyncedEvent.Subscribe(OnTimeSyncedEvent);
     }
 
     void OnTimeSyncedEvent(void *args)
     {
       Services::Time::TimeSyncedEvent.Unsubscribe(OnTimeSyncedEvent);
 
-      CalculateSunAngleEvent.Subscribe(OnCalculateSunAngleEvent);
-      Services::System::InvokeRepeating(&CalculateSunAngleEvent, OneSecond, OneSecond);
+      Services::System::LoopEvent.Subscribe(OnLoopEvent);
     }
 
-    void OnCalculateSunAngleEvent(void *args)
+    void OnLoopEvent(void *args)
     {
       auto timezone = &Services::Time::Localtime;
       auto currentTime = UTC.now();
 
       auto solarAngle = SolarMath::GetSolarElevationAngle(currentTime, timezone, LATITUDE, LONGITUDE);
-      //auto solarRatio = SolarMath::SolarAngleToLightRatio(solarAngle);
+      auto solarRatio = SolarMath::SolarAngleToLightRatio(solarAngle);
 
-      Serial.print(solarAngle, 3);
-      Serial.print('@');
+      auto maxAllowedRatio = RuleForLighting.GetLightRatio(currentTime, timezone);
 
-      Serial.print(timezone->hour(currentTime, UTC_TIME));
-      Serial.print(':');
-      Serial.print(timezone->minute(currentTime, UTC_TIME));
-      Serial.println('\n');
+      Channel.WriteRatio(min(solarRatio, maxAllowedRatio));
     }
 
   } // namespace Light

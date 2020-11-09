@@ -7,6 +7,7 @@ using namespace std;
 PWMChannel::PWMChannel(uint8_t pin, bool invertSignal)
 {
   ChannelType = LightChannelType::DigitalPin;
+  CurrentPwmValue = 0;
 
   Pin = pin;
   InvertSignal = invertSignal;
@@ -20,6 +21,7 @@ PWMChannel::PWMChannel(uint8_t pin, bool invertSignal)
 PWMChannel::PWMChannel(uint8_t pin, bool invertSignal, double frequency_Hz, uint8_t resolution_bit, uint8_t ledChannel, double pwmMinRatio, double pwmMaxRatio)
 {
   ChannelType = LightChannelType::ESP32PWM;
+  CurrentPwmValue = 0;
 
   Pin = pin;
   InvertSignal = invertSignal;
@@ -33,6 +35,7 @@ PWMChannel::PWMChannel(uint8_t pin, bool invertSignal, double frequency_Hz, uint
 PWMChannel::PWMChannel(uint8_t pin, bool invertSignal, double frequency_Hz, uint8_t resolution_bit, double pwmMinRatio, double pwmMaxRatio)
 {
   ChannelType = LightChannelType::ESP8266PWM;
+  CurrentPwmValue = 0;
 
   Pin = pin;
   InvertSignal = invertSignal;
@@ -69,17 +72,17 @@ void PWMChannel::Initialize()
   }
 #endif
 
-  WriteCounts(PwmMinValue);
+  WriteCounts(PwmMinValue, true);
 }
 
-void PWMChannel::WriteRatio(double ratio)
+void PWMChannel::WriteRatio(double ratio, bool force)
 {
   uint16_t counts = round(Math::Map<double>(ratio, 0.0, 1.0, PwmMinValue, PwmMaxValue));
 
-  WriteCounts(counts);
+  WriteCounts(counts, force);
 }
 
-void PWMChannel::WriteCounts(uint16_t value)
+void PWMChannel::WriteCounts(uint16_t value, bool force)
 {
   value = Math::Clamp<uint16_t>(value, PwmMinValue, PwmMaxValue);
 
@@ -89,6 +92,11 @@ void PWMChannel::WriteCounts(uint16_t value)
     value = value << (16 - Resolution_bit);
     value = value >> (16 - Resolution_bit);
   }
+
+  if (!force && value == CurrentPwmValue)
+    return;
+
+  CurrentPwmValue = value;
 
   if (ChannelType == LightChannelType::DigitalPin)
   {

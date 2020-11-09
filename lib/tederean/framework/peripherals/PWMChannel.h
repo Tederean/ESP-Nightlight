@@ -33,6 +33,8 @@ private:
 
   uint8_t LedChannel;
 
+  uint16_t CurrentPwmValue;
+  
   uint16_t PwmRatioToValue(uint8_t resolution_bit, double ratio);
 
   uint16_t ResolutionToCounts(uint8_t resolution_bit);
@@ -47,9 +49,9 @@ public:
 
   void Initialize();
 
-  void WriteCounts(uint16_t value);
+  void WriteCounts(uint16_t value, bool force = false);
 
-  void WriteRatio(double ratio);
+  void WriteRatio(double ratio, bool force = false);
 };
 
 #endif
