@@ -30,7 +30,7 @@ private:
 public:
   void SetRule(TimeOfDay beginTransitionStart, TimeOfDay beginTransitionStop, TimeOfDay endTransitionStart, TimeOfDay endTransitionStop);
 
-  double GetLightRatio(time_t time, Timezone *timezone, const ezLocalOrUTC_t local_or_utc);
+  double GetLightRatio(time_t time, Timezone *timezone);
 };
 
 #endif

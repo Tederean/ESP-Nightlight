@@ -51,7 +51,7 @@ namespace Services
       auto timezone = &Services::Time::Localtime;
       auto currentTime = UTC.now();
 
-      auto solarAngle = SolarMath::GetSolarElevationAngle(currentTime, timezone, UTC_TIME, LATITUDE, LONGITUDE);
+      auto solarAngle = SolarMath::GetSolarElevationAngle(currentTime, timezone, LATITUDE, LONGITUDE);
       //auto solarRatio = SolarMath::SolarAngleToLightRatio(solarAngle);
 
       Serial.print(solarAngle, 3);

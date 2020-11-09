@@ -8,15 +8,15 @@ using namespace std;
 namespace SolarMath
 {
 
-  double GetSolarElevationAngle(time_t time, Timezone *timezone, const ezLocalOrUTC_t local_or_utc, double latitude, double longitude)
+  double GetSolarElevationAngle(time_t time, Timezone *timezone, double latitude, double longitude)
   {
-    if (timezone->isDST(time, local_or_utc))
+    if (timezone->isDST(time, UTC_TIME))
     {
-      time -= timezone->getOffset(time, local_or_utc) * 60L; // We require natural time.
+      time -= timezone->getOffset(time, UTC_TIME) * 60L; // We require natural time.
     }
 
-    auto dayOfYear = timezone->dayOfYear(time, local_or_utc);
-    auto hoursOfDay = Time::GetSecondsOfDay<double>(timezone, time, local_or_utc) / 3600.0;
+    auto dayOfYear = timezone->dayOfYear(time, UTC_TIME);
+    auto hoursOfDay = Time::GetSecondsOfDay<double>(time, timezone) / 3600.0;
 
     // Here the magic beginns.
 

@@ -10,11 +10,11 @@ namespace Time
 {
 
   template <typename T>
-  T GetSecondsOfDay(Timezone *timezone, time_t time, const ezLocalOrUTC_t local_or_utc)
+  T GetSecondsOfDay(time_t time, Timezone *timezone)
   {
-    auto hours = timezone->hour(time, local_or_utc);
-    auto minutes = timezone->minute(time, local_or_utc);
-    auto seconds = timezone->second(time, local_or_utc);
+    auto hours = timezone->hour(time, UTC_TIME);
+    auto minutes = timezone->minute(time, UTC_TIME);
+    auto seconds = timezone->second(time, UTC_TIME);
 
     if (is_same<T, float>::value || is_same<T, double>::value)
     {

@@ -63,11 +63,11 @@ namespace Services
       Timezone *localtime = &Services::Time::Localtime;
       time_t rebootTime = GetDailyMiddayRebootTime(localtime);
 
-      Debug("ESP restart time: " + localtime->dateTime(rebootTime, LOCAL_TIME) + "\n");
+      Debug("ESP restart time: " + localtime->dateTime(rebootTime, UTC_TIME) + "\n");
 
       DailyMiddayRebootEvent.Subscribe(OnDailyMiddayRebootEvent);
 
-      localtime->setEvent([] { DailyMiddayRebootEvent.Invoke(nullptr); }, rebootTime, LOCAL_TIME);
+      localtime->setEvent([] { DailyMiddayRebootEvent.Invoke(nullptr); }, rebootTime, UTC_TIME);
     }
 
     void OnDailyMiddayRebootEvent(void *args)
@@ -80,24 +80,26 @@ namespace Services
       ESP.restart();
     }
 
-    time_t GetDailyMiddayRebootTime(Timezone *time)
+    time_t GetDailyMiddayRebootTime(Timezone *timezone)
     {
       const time_t TenMinutes = 600;
       const time_t HalfAnHour = 1800;
       const time_t OneDay = 3600 * 24;
 
-      time_t now = time->now();
+      time_t currentTime = UTC.now();
       tmElements_t timeBuilder;
 
-      breakTime(now, timeBuilder);
+      breakTime(currentTime, timeBuilder);
       timeBuilder.Hour = 12;
       timeBuilder.Minute = 0;
       timeBuilder.Second = 0;
       time_t midday = makeTime(timeBuilder);
+      
+      midday += timezone->getOffset(midday, UTC_TIME) * 60;
 
       time_t rebootTime = midday + random(-TenMinutes, TenMinutes);
 
-      if ((rebootTime - now) < HalfAnHour)
+      if ((rebootTime - currentTime) < HalfAnHour)
       {
         rebootTime += OneDay;
       }

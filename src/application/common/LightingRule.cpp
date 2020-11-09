@@ -14,9 +14,9 @@ void LightingRule::SetRule(TimeOfDay beginTransitionStart, TimeOfDay beginTransi
   EndTransitionStop = TimeOfDayToSeconds(endTransitionStop);
 }
 
-double LightingRule::GetLightRatio(time_t time, Timezone *timezone, const ezLocalOrUTC_t local_or_utc)
+double LightingRule::GetLightRatio(time_t time, Timezone *timezone)
 {
-  double secondsOfDay = Time::GetSecondsOfDay<double>(timezone, time, local_or_utc);
+  double secondsOfDay = Time::GetSecondsOfDay<double>(time, timezone);
   double ratio = 0.0;
 
   if (secondsOfDay >= BeginTransitionStop && secondsOfDay <= EndTransitionStart)
