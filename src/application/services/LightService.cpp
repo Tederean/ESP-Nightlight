@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <application/services/LightService.h>
 #include <application/common/SolarMath.h>
+#include <application/common/LightingRule.h>
 #include <framework/services/TimeService.h>
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
@@ -20,11 +21,21 @@ namespace Services
 
     const int64_t OneSecond = 1000LL * 1000LL;
 
+    LightingRule RuleForLighting;
+
     Event<void> CalculateSunAngleEvent;
 
     void Initialize()
     {
       Services::Time::TimeSyncedEvent.Subscribe(OnTimeSyncedEvent);
+
+      TimeOfDay morningTransitionStart = {MORNING_TRANSITION_START};
+      TimeOfDay morningTransitionStop = {MORNING_TRANSITION_STOP};
+
+      TimeOfDay afternoonTransitionStart = {AFTERNOON_TRANSITION_START};
+      TimeOfDay afternoonTransitionStop = {AFTERNOON_TRANSITION_STOP};
+
+      RuleForLighting.SetRule(morningTransitionStart, morningTransitionStop, afternoonTransitionStart, afternoonTransitionStop);
     }
 
     void OnTimeSyncedEvent(void *args)
@@ -40,7 +51,7 @@ namespace Services
       auto timezone = &Services::Time::Localtime;
       auto currentTime = timezone->now();
 
-      auto solarAngle = SolarMath::GetSolarElevationAngle(currentTime, timezone, LATITUDE);
+      auto solarAngle = SolarMath::GetSolarElevationAngle(currentTime, timezone, UTC_TIME, LATITUDE, LONGITUDE);
       auto solarRatio = SolarMath::SolarAngleToLightRatio(solarAngle);
 
       Serial.print("Angle: ");

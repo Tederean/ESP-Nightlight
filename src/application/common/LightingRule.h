@@ -6,12 +6,6 @@
 
 using namespace std;
 
-enum class LightingRuleType
-{
-  AllowLight,
-  DenyLight
-};
-
 typedef struct
 {
   uint8_t Hours;
@@ -23,8 +17,6 @@ class LightingRule
 {
 
 private:
-  LightingRuleType Type;
-
   uint32_t BeginTransitionStart;
 
   uint32_t BeginTransitionStop;
@@ -36,9 +28,9 @@ private:
   uint32_t TimeOfDayToSeconds(TimeOfDay timeOfDay);
 
 public:
-  LightingRule(LightingRuleType type, TimeOfDay beginTransitionStart, TimeOfDay beginTransitionStop, TimeOfDay endTransitionStart, TimeOfDay endTransitionStop);
+  void SetRule(TimeOfDay beginTransitionStart, TimeOfDay beginTransitionStop, TimeOfDay endTransitionStart, TimeOfDay endTransitionStop);
 
-  double GetLightRatio(Timezone *timezone, time_t time, const ezLocalOrUTC_t local_or_utc);
+  double GetLightRatio(time_t time, Timezone *timezone, const ezLocalOrUTC_t local_or_utc);
 };
 
 #endif

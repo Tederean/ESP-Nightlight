@@ -18,9 +18,9 @@ namespace Services
 
     void OnDisableWifiEvent(void *args);
 
-    const int64_t FiveSeconds = 5LL * 1000LL * 1000LL;
+    const int64_t WifiEnableTime = WIFI_ENABLE_TIME * 1000LL * 1000LL;
 
-    const int64_t TenMinutes = 10LL * 60LL * 1000LL * 1000LL;
+    const int64_t WifiDisableTime = WIFI_DISABLE_TIME * 1000LL * 1000LL;
 
     Event<void> EnableWifiEvent;
 
@@ -29,10 +29,10 @@ namespace Services
     void Initialize()
     {
       EnableWifiEvent.Subscribe(OnEnableWifiEvent);
-      Services::System::InvokeOnce(&EnableWifiEvent, FiveSeconds);
+      Services::System::InvokeOnce(&EnableWifiEvent, WifiEnableTime);
 
       DisableWifiEvent.Subscribe(OnDisableWifiEvent);
-      Services::System::InvokeOnce(&DisableWifiEvent, TenMinutes);
+      Services::System::InvokeOnce(&DisableWifiEvent, WifiDisableTime);
     }
 
     void OnEnableWifiEvent(void *args)
@@ -41,13 +41,15 @@ namespace Services
 
       Services::Wifi::EnableWifi(WIFI_SSID, WIFI_PSK, WIFI_NAME);
       Services::Ota::EnableOta(WIFI_NAME, WIFI_NAME);
+
+      Debug("Enabled WiFi.\n");
     }
 
     void OnDisableWifiEvent(void *args)
     {
       DisableWifiEvent.Unsubscribe(OnDisableWifiEvent);
 
-      Debug("Disconnecting from WiFi.\n");
+      Debug("Disabled WiFi.\n");
 
       Services::Ota::DisableOta();
       Services::Wifi::DisableWifi();

@@ -6,17 +6,15 @@
 
 using namespace std;
 
-LightingRule::LightingRule(LightingRuleType type, TimeOfDay beginTransitionStart, TimeOfDay beginTransitionStop, TimeOfDay endTransitionStart, TimeOfDay endTransitionStop)
+void LightingRule::SetRule(TimeOfDay beginTransitionStart, TimeOfDay beginTransitionStop, TimeOfDay endTransitionStart, TimeOfDay endTransitionStop)
 {
-  Type = type;
-
   BeginTransitionStart = TimeOfDayToSeconds(beginTransitionStart);
   BeginTransitionStop = TimeOfDayToSeconds(beginTransitionStop);
   EndTransitionStart = TimeOfDayToSeconds(endTransitionStart);
   EndTransitionStop = TimeOfDayToSeconds(endTransitionStop);
 }
 
-double LightingRule::GetLightRatio(Timezone *timezone, time_t time, const ezLocalOrUTC_t local_or_utc)
+double LightingRule::GetLightRatio(time_t time, Timezone *timezone, const ezLocalOrUTC_t local_or_utc)
 {
   double secondsOfDay = Time::GetSecondsOfDay<double>(timezone, time, local_or_utc);
   double ratio = 0.0;
@@ -34,11 +32,6 @@ double LightingRule::GetLightRatio(Timezone *timezone, time_t time, const ezLoca
   else if (secondsOfDay > EndTransitionStart && secondsOfDay < EndTransitionStop)
   {
     ratio = Math::Map<double>(secondsOfDay, EndTransitionStart, EndTransitionStop, 0.0, 1.0);
-  }
-
-  if (Type == LightingRuleType::DenyLight)
-  {
-    ratio = abs(ratio - 1.0); // Invert
   }
 
   return Math::Clamp<double>(ratio, 0.0, 1.0);

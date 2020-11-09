@@ -24,13 +24,7 @@ namespace Services
 
     time_t GetDailyMiddayRebootTime();
 
-    const int64_t TenMinutesFiveSeconds = (5LL + 10LL * 60LL) * 1000LL * 1000LL;
-
-    const long TenMinutes = 600L;
-
-    const long HalfAnHour = 1800L;
-
-    const long OneDay = 3600L * 24L;
+    const int64_t NetworkTimeoutRebootTime = (5LL + WIFI_DISABLE_TIME) * 1000LL * 1000LL;
 
     Event<void> NetworkTimeoutRebootEvent;
 
@@ -39,7 +33,7 @@ namespace Services
     void Initialize()
     {
       NetworkTimeoutRebootEvent.Subscribe(OnNetworkTimeoutRebootEvent);
-      Services::System::InvokeOnce(&NetworkTimeoutRebootEvent, TenMinutesFiveSeconds);
+      Services::System::InvokeOnce(&NetworkTimeoutRebootEvent, NetworkTimeoutRebootTime);
 
       Services::Time::TimeSyncedEvent.Subscribe(OnTimeSyncedEvent);
     }
@@ -88,6 +82,10 @@ namespace Services
 
     time_t GetDailyMiddayRebootTime()
     {
+      const time_t TenMinutes = 600;
+      const time_t HalfAnHour = 1800;
+      const time_t OneDay = 3600 * 24;
+
       time_t now = Services::Time::Localtime.now();
       tmElements_t timeBuilder;
 
