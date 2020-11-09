@@ -31,7 +31,7 @@ double LightingRule::GetLightRatio(time_t time, Timezone *timezone)
 
   else if (secondsOfDay > EndTransitionStart && secondsOfDay < EndTransitionStop)
   {
-    ratio = Math::Map<double>(secondsOfDay, EndTransitionStart, EndTransitionStop, 0.0, 1.0);
+    ratio = Math::Map<double>(secondsOfDay, EndTransitionStart, EndTransitionStop, 1.0, 0.0);
   }
 
   return Math::Clamp<double>(ratio, 0.0, 1.0);

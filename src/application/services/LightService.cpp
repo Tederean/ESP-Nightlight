@@ -3,6 +3,7 @@
 #include <application/common/SolarMath.h>
 #include <application/common/LightingRule.h>
 #include <framework/peripherals/PWMChannel.h>
+#include <framework/services/OtaService.h>
 #include <framework/services/TimeService.h>
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
@@ -20,7 +21,7 @@ namespace Services
 
     void OnLoopEvent(void *args);
 
-#if (PWM_RESOLUTION == 1) 
+#if (PWM_RESOLUTION == 1)
     PWMChannel Channel(PWM_PIN, PWM_INVERTED);
 #elif defined(ESP32)
     PWMChannel Channel(PWM_PIN, PWM_INVERTED, PWM_FREQUENCY, PWM_RESOLUTION, PWM_CHANNEL, 0.0, PWM_RATIO);
@@ -54,6 +55,9 @@ namespace Services
 
     void OnLoopEvent(void *args)
     {
+      if (Services::Ota::IsUpdating())
+        return;
+
       auto timezone = &Services::Time::Localtime;
       auto currentTime = UTC.now();
 
