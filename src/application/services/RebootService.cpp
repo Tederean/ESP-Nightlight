@@ -22,7 +22,7 @@ namespace Services
 
     void OnDailyMiddayRebootEvent(void *args);
 
-    time_t GetDailyMiddayRebootTime();
+    time_t GetDailyMiddayRebootTime(Timezone *localtime);
 
     const int64_t NetworkTimeoutRebootTime = (5LL + WIFI_DISABLE_TIME) * 1000LL * 1000LL;
 
@@ -60,8 +60,8 @@ namespace Services
 
     void SetupDailyMiddayReboot()
     {
-      time_t rebootTime = GetDailyMiddayRebootTime();
       Timezone *localtime = &Services::Time::Localtime;
+      time_t rebootTime = GetDailyMiddayRebootTime(localtime);
 
       Debug("ESP restart time: " + localtime->dateTime(rebootTime, LOCAL_TIME) + "\n");
 
@@ -80,13 +80,13 @@ namespace Services
       ESP.restart();
     }
 
-    time_t GetDailyMiddayRebootTime()
+    time_t GetDailyMiddayRebootTime(Timezone *time)
     {
       const time_t TenMinutes = 600;
       const time_t HalfAnHour = 1800;
       const time_t OneDay = 3600 * 24;
 
-      time_t now = Services::Time::Localtime.now();
+      time_t now = time->now();
       tmElements_t timeBuilder;
 
       breakTime(now, timeBuilder);

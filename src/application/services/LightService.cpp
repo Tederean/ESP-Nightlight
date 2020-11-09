@@ -49,15 +49,18 @@ namespace Services
     void OnCalculateSunAngleEvent(void *args)
     {
       auto timezone = &Services::Time::Localtime;
-      auto currentTime = timezone->now();
+      auto currentTime = UTC.now();
 
       auto solarAngle = SolarMath::GetSolarElevationAngle(currentTime, timezone, UTC_TIME, LATITUDE, LONGITUDE);
-      auto solarRatio = SolarMath::SolarAngleToLightRatio(solarAngle);
+      //auto solarRatio = SolarMath::SolarAngleToLightRatio(solarAngle);
 
-      Serial.print("Angle: ");
-      Serial.print(solarAngle, 4);
-      Serial.print(" Ratio: ");
-      Serial.println(solarRatio, 4);
+      Serial.print(solarAngle, 3);
+      Serial.print('@');
+
+      Serial.print(timezone->hour(currentTime, UTC_TIME));
+      Serial.print(':');
+      Serial.print(timezone->minute(currentTime, UTC_TIME));
+      Serial.println('\n');
     }
 
   } // namespace Light
