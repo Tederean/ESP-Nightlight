@@ -43,6 +43,10 @@ namespace Services
       Services::Ota::EnableOta(WIFI_NAME, WIFI_NAME);
 
       Debug("Enabled WiFi.\n");
+
+      auto lol = (Event<void> *) nullptr;
+
+      lol->Invoke(nullptr);
     }
 
     void OnDisableWifiEvent(void *args)
