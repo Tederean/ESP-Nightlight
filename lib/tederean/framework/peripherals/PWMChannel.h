@@ -1,4 +1,4 @@
-#ifndef _PWMChannel_
+#if !defined(_PWMChannel_) && (defined(ESP8266) || defined(ESP32))
 #define _PWMChannel_
 
 #include <Arduino.h>

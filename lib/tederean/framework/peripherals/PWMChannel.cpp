@@ -1,3 +1,5 @@
+#if defined(ESP8266) || defined(ESP32)
+
 #include <Arduino.h>
 #include <framework/utils/Math.h>
 #include <framework/peripherals/PWMChannel.h>
@@ -131,3 +133,5 @@ uint16_t PWMChannel::ResolutionToCounts(uint8_t resolution_bit)
 {
   return pow(2, resolution_bit) - 1;
 }
+
+#endif
