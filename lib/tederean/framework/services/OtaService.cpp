@@ -1,3 +1,5 @@
+#if defined(ESP8266) || defined(ESP32)
+
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 #include <framework/services/WifiService.h>
@@ -162,3 +164,5 @@ namespace Services
 
   } // namespace Ota
 } // namespace Services
+
+#endif

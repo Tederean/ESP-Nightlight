@@ -1,4 +1,4 @@
-#ifndef _WifiService_
+#if !defined(_WifiService_) && (defined(ESP8266) || defined(ESP32))
 #define _WifiService_
 
 #include <Arduino.h>

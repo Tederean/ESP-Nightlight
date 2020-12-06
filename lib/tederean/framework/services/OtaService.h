@@ -1,4 +1,4 @@
-#ifndef _OtaService_
+#if !defined(_OtaService_) && (defined(ESP8266) || defined(ESP32))
 #define _OtaService_
 
 #include <Arduino.h>

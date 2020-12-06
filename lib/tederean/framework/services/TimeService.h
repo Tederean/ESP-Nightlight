@@ -1,4 +1,4 @@
-#ifndef _TimerService_
+#if !defined(_TimerService_) && (defined(ESP8266) || defined(ESP32))
 #define _TimerService_
 
 #include <Arduino.h>

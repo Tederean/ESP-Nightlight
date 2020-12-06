@@ -1,3 +1,5 @@
+#if defined(ESP8266) || defined(ESP32)
+
 #include <Arduino.h>
 #include <ezTime.h>
 #include <framework/services/TimeService.h>
@@ -67,3 +69,5 @@ namespace Services
 
   } // namespace Time
 } // namespace Services
+
+#endif

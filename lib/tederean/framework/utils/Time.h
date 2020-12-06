@@ -1,4 +1,4 @@
-#ifndef _Time_
+#if !defined(_Time_) && (defined(ESP8266) || defined(ESP32))
 #define _Time_
 
 #include <Arduino.h>
