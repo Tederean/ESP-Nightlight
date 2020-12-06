@@ -18,9 +18,9 @@ namespace Services
 
     void OnDisableWifiEvent(void *args);
 
-    const int64_t WifiEnableTime = WIFI_ENABLE_TIME * 1000LL * 1000LL;
+    const timespan_t WifiEnableTime = WIFI_ENABLE_TIME * 1000 * 1000;
 
-    const int64_t WifiDisableTime = WIFI_DISABLE_TIME * 1000LL * 1000LL;
+    const timespan_t WifiDisableTime = WIFI_DISABLE_TIME * 1000 * 1000;
 
     Event<void> EnableWifiEvent;
 
@@ -43,10 +43,6 @@ namespace Services
       Services::Ota::EnableOta(WIFI_NAME, WIFI_NAME);
 
       Debug("Enabled WiFi.\n");
-
-      auto lol = (Event<void> *) nullptr;
-
-      lol->Invoke(nullptr);
     }
 
     void OnDisableWifiEvent(void *args)

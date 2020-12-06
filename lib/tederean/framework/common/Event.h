@@ -2,6 +2,7 @@
 #define _Event_
 
 #include <Arduino.h>
+#include <vector>
 
 using namespace std;
 

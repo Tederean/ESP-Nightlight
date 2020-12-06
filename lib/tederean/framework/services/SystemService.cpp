@@ -1,5 +1,12 @@
 #include <Arduino.h>
+#include <vector>
+
+#if !defined(ESP8266) && !defined(ESP32)
+#include <ArxSmartPtr.h>
+#else
 #include <memory>
+#endif
+
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
 
@@ -8,8 +15,8 @@ using namespace std;
 typedef struct
 {
   Event<void> *TargetEvent;
-  int64_t NextExecution_us;
-  int64_t Interval_us;
+  timespan_t NextExecution_us;
+  timespan_t Interval_us;
 } ScheduledEvent;
 
 namespace Services
@@ -19,15 +26,15 @@ namespace Services
 
     void Initialize();
 
-    int64_t GetUptime_us();
+    timespan_t GetUptime_us();
 
-    void InvokeOnce(Event<void> *event, int64_t delay_us);
+    void InvokeOnce(Event<void> *event, timespan_t delay_us);
 
-    void InvokeRepeating(Event<void> *event, int64_t firstDelay_us, int64_t repeatingDelay_us);
+    void InvokeRepeating(Event<void> *event, timespan_t firstDelay_us, timespan_t repeatingDelay_us);
 
     void InvokeCancel(Event<void> *event);
 
-    void AddEvent(Event<void> *event, int64_t firstDelay_us, int64_t interval_us);
+    void AddEvent(Event<void> *event, timespan_t firstDelay_us, timespan_t interval_us);
 
     void RemoveEvent(Event<void> *event);
 
@@ -43,25 +50,30 @@ namespace Services
     {
 #ifdef SERIAL_DEBUG
       Serial.begin(115200UL);
+
+#if defined(ESP8266) || defined(ESP32)
       Serial.setDebugOutput(true);
+#endif
 #endif
     }
 
-    int64_t GetUptime_us()
+    timespan_t GetUptime_us()
     {
 #if defined(ESP32)
       return esp_timer_get_time();
 #elif defined(ESP8266)
       return micros64();
+#else
+      return micros();
 #endif
     }
 
-    void InvokeOnce(Event<void> *event, int64_t delay_us)
+    void InvokeOnce(Event<void> *event, timespan_t delay_us)
     {
       AddEvent(event, delay_us, -1);
     }
 
-    void InvokeRepeating(Event<void> *event, int64_t firstDelay_us, int64_t repeatingDelay_us)
+    void InvokeRepeating(Event<void> *event, timespan_t firstDelay_us, timespan_t repeatingDelay_us)
     {
       AddEvent(event, firstDelay_us, repeatingDelay_us);
     }
@@ -71,13 +83,13 @@ namespace Services
       RemoveEvent(event);
     }
 
-    void AddEvent(Event<void> *event, int64_t firstDelay_us, int64_t interval_us)
+    void AddEvent(Event<void> *event, timespan_t firstDelay_us, timespan_t interval_us)
     {
       int16_t index = FindEventIndex(event);
 
       if (index < 0)
       {
-        int64_t nextExecution_us = GetUptime_us() + firstDelay_us;
+        timespan_t nextExecution_us = GetUptime_us() + firstDelay_us;
 
         shared_ptr<ScheduledEvent> scheduledEvent((ScheduledEvent *)malloc(sizeof(ScheduledEvent)));
         scheduledEvent->TargetEvent = event;
@@ -124,7 +136,7 @@ namespace Services
     void OnLoopEvent(void *args)
     {
       vector<Event<void> *> TargetsToRemove;
-      int64_t presentTime = GetUptime_us();
+      timespan_t presentTime = GetUptime_us();
 
       for (size_t index = 0; index < ScheduledTargets.size(); ++index)
       {

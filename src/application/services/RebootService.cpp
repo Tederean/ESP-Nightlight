@@ -24,7 +24,7 @@ namespace Services
 
     time_t GetDailyMiddayRebootTime(Timezone *localtime);
 
-    const int64_t NetworkTimeoutRebootTime = (5LL + WIFI_DISABLE_TIME) * 1000LL * 1000LL;
+    const timespan_t NetworkTimeoutRebootTime = (5 + WIFI_DISABLE_TIME) * 1000 * 1000;
 
     Event<void> NetworkTimeoutRebootEvent;
 
