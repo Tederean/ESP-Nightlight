@@ -29,10 +29,10 @@ namespace Services
     void Initialize()
     {
       EnableWifiEvent.Subscribe(OnEnableWifiEvent);
-      Services::System::InvokeOnce(&EnableWifiEvent, WifiEnableTime);
+      Services::System::InvokeLater(&EnableWifiEvent, WifiEnableTime, false);
 
       DisableWifiEvent.Subscribe(OnDisableWifiEvent);
-      Services::System::InvokeOnce(&DisableWifiEvent, WifiDisableTime);
+      Services::System::InvokeLater(&DisableWifiEvent, WifiDisableTime, false);
     }
 
     void OnEnableWifiEvent(void *args)

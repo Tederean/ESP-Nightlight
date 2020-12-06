@@ -15,8 +15,9 @@ using namespace std;
 typedef struct
 {
   Event<void> *TargetEvent;
-  timespan_t NextExecution_us;
+  timespan_t LastExecution_us;
   timespan_t Interval_us;
+  bool Repeat;
 } ScheduledEvent;
 
 namespace Services
@@ -28,9 +29,7 @@ namespace Services
 
     timespan_t GetUptime_us();
 
-    void InvokeOnce(Event<void> *event, timespan_t delay_us);
-
-    void InvokeRepeating(Event<void> *event, timespan_t firstDelay_us, timespan_t repeatingDelay_us);
+    void InvokeLater(Event<void> *event, timespan_t delay_us, bool repeating);
 
     void InvokeCancel(Event<void> *event);
 
@@ -68,33 +67,18 @@ namespace Services
 #endif
     }
 
-    void InvokeOnce(Event<void> *event, timespan_t delay_us)
-    {
-      AddEvent(event, delay_us, -1);
-    }
-
-    void InvokeRepeating(Event<void> *event, timespan_t firstDelay_us, timespan_t repeatingDelay_us)
-    {
-      AddEvent(event, firstDelay_us, repeatingDelay_us);
-    }
-
-    void InvokeCancel(Event<void> *event)
-    {
-      RemoveEvent(event);
-    }
-
-    void AddEvent(Event<void> *event, timespan_t firstDelay_us, timespan_t interval_us)
+    void InvokeLater(Event<void> *event, timespan_t delay_us, bool repeating)
     {
       int16_t index = FindEventIndex(event);
 
       if (index < 0)
       {
-        timespan_t nextExecution_us = GetUptime_us() + firstDelay_us;
-
         shared_ptr<ScheduledEvent> scheduledEvent((ScheduledEvent *)malloc(sizeof(ScheduledEvent)));
+
         scheduledEvent->TargetEvent = event;
-        scheduledEvent->NextExecution_us = nextExecution_us;
-        scheduledEvent->Interval_us = interval_us;
+        scheduledEvent->LastExecution_us = GetUptime_us();
+        scheduledEvent->Interval_us = delay_us;
+        scheduledEvent->Repeat = repeating;
 
         if (ScheduledTargets.empty())
         {
@@ -103,6 +87,11 @@ namespace Services
 
         ScheduledTargets.push_back(scheduledEvent);
       }
+    }
+
+    void InvokeCancel(Event<void> *event)
+    {
+      RemoveEvent(event);
     }
 
     void RemoveEvent(Event<void> *event)
@@ -142,18 +131,19 @@ namespace Services
       {
         shared_ptr<ScheduledEvent> scheduledEvent = ScheduledTargets[index];
 
-        if (scheduledEvent->NextExecution_us > presentTime)
-          continue;
-
-        scheduledEvent->TargetEvent->Invoke(nullptr);
-
-        if (scheduledEvent->Interval_us <= 0)
+        if (presentTime - scheduledEvent->LastExecution_us > scheduledEvent->Interval_us)
         {
-          TargetsToRemove.push_back(scheduledEvent->TargetEvent);
-          continue;
-        }
+          scheduledEvent->TargetEvent->Invoke(nullptr);
 
-        scheduledEvent->NextExecution_us += scheduledEvent->Interval_us;
+          if (scheduledEvent->Repeat)
+          {
+            scheduledEvent->LastExecution_us = scheduledEvent->LastExecution_us + scheduledEvent->Interval_us;
+          }
+          else
+          {
+            TargetsToRemove.push_back(scheduledEvent->TargetEvent);
+          }
+        }
       }
 
       for (size_t index = 0; index < TargetsToRemove.size(); ++index)

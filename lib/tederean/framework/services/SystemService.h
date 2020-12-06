@@ -36,9 +36,7 @@ namespace Services
 
     timespan_t GetUptime_us();
 
-    void InvokeOnce(Event<void> *event, timespan_t delay_us);
-
-    void InvokeRepeating(Event<void> *event, timespan_t firstDelay_us, timespan_t repeatingDelay_us);
+    void InvokeLater(Event<void> *event, timespan_t delay_us, bool repeating);
 
     void InvokeCancel(Event<void> *event);
 

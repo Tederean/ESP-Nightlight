@@ -33,7 +33,7 @@ namespace Services
     void Initialize()
     {
       NetworkTimeoutRebootEvent.Subscribe(OnNetworkTimeoutRebootEvent);
-      Services::System::InvokeOnce(&NetworkTimeoutRebootEvent, NetworkTimeoutRebootTime);
+      Services::System::InvokeLater(&NetworkTimeoutRebootEvent, NetworkTimeoutRebootTime, false);
 
       Services::Time::TimeSyncedEvent.Subscribe(OnTimeSyncedEvent);
     }
