@@ -7,7 +7,6 @@
 #include <framework/services/TimeService.h>
 #include <framework/services/SystemService.h>
 #include <framework/common/Event.h>
-#include <framework/utils/Math.h>
 
 using namespace std;
 
@@ -67,7 +66,7 @@ namespace Services
 
       auto maxAllowedRatio = RuleForLighting.GetLightRatio(currentTime, timezone);
 
-      Channel.WriteRatio(Math::Min<double>(solarRatio, maxAllowedRatio));
+      Channel.WriteRatio(min(solarRatio, maxAllowedRatio));
     }
 
   } // namespace Light
